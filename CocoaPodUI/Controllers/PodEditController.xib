@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment defaultVersion="1080" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PodEditController">
+            <connections>
+                <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application"/>
+        <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="F0z-JX-Cv5">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="196" y="240" width="160" height="110"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1178"/>
+            <view key="contentView" id="se5-gp-TjO">
+                <rect key="frame" x="0.0" y="0.0" width="160" height="110"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bq9-11-bpr">
+                        <rect key="frame" x="72" y="13" width="74" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="62" id="F7h-MG-mJH"/>
+                            <constraint firstAttribute="height" constant="21" id="rhK-fY-dd6"/>
+                        </constraints>
+                        <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="yuD-SX-jkx">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="closeAction:" target="-2" id="eD7-I6-GFg"/>
+                        </connections>
+                    </button>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ecM-nn-aew">
+                        <rect key="frame" x="20" y="67" width="44" height="23"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="23" id="3E2-CQ-qsj"/>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="34" id="w4y-cv-DQc"/>
+                        </constraints>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="dE4-iI-xQn">
+                            <font key="font" size="16" name="HelveticaNeue"/>
+                            <color key="textColor" red="0.98431372549019602" green="0.0" blue="0.023529411764705882" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                        <connections>
+                            <binding destination="-2" name="displayPatternValue1" keyPath="self.item.name" id="SWk-9t-Q7H">
+                                <dictionary key="options">
+                                    <string key="NSDisplayPattern">%{value1}@</string>
+                                </dictionary>
+                            </binding>
+                        </connections>
+                    </textField>
+                    <popUpButton translatesAutoresizingMaskIntoConstraints="NO" id="G0a-O6-fPU">
+                        <rect key="frame" x="70" y="65" width="70" height="27"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="70" id="2Pp-60-Kci"/>
+                            <constraint firstAttribute="height" constant="27" id="Yje-dJ-caw"/>
+                        </constraints>
+                        <popUpButtonCell key="cell" type="bevel" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" inset="2" selectedItem="vAd-QD-ugp" id="iKs-GV-ndh">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" size="16" name="HelveticaNeue-Light"/>
+                            <menu key="menu" title="OtherViews" id="kZZ-BE-33i">
+                                <items>
+                                    <menuItem title="Item 1" state="on" id="vAd-QD-ugp"/>
+                                    <menuItem title="Item 2" id="q0J-np-1tO"/>
+                                    <menuItem title="Item 3" id="pMC-l4-uVL"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <binding destination="-2" name="content" keyPath="self.item.availableVersions" id="xDa-2G-E6b"/>
+                            <binding destination="-2" name="selectedValue" keyPath="self.item.version" previousBinding="xDa-2G-E6b" id="EOy-Tf-31X"/>
+                        </connections>
+                    </popUpButton>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="bq9-11-bpr" firstAttribute="top" secondItem="G0a-O6-fPU" secondAttribute="bottom" constant="24" id="80s-cH-bYj"/>
+                    <constraint firstAttribute="bottom" secondItem="bq9-11-bpr" secondAttribute="bottom" constant="20" id="F7a-Eo-i0n"/>
+                    <constraint firstItem="ecM-nn-aew" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="20" id="Vd2-om-TUC"/>
+                    <constraint firstItem="G0a-O6-fPU" firstAttribute="leading" secondItem="ecM-nn-aew" secondAttribute="trailing" constant="8" id="dHd-dt-usv"/>
+                    <constraint firstItem="G0a-O6-fPU" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="18" id="dP1-No-MtC"/>
+                    <constraint firstItem="ecM-nn-aew" firstAttribute="leading" secondItem="se5-gp-TjO" secondAttribute="leading" constant="22" id="jP4-04-ieg"/>
+                    <constraint firstAttribute="trailing" secondItem="bq9-11-bpr" secondAttribute="trailing" constant="20" id="lF5-T9-9ZN"/>
+                    <constraint firstAttribute="trailing" secondItem="G0a-O6-fPU" secondAttribute="trailing" constant="20" id="xv6-eF-7Pl"/>
+                </constraints>
+            </view>
+            <connections>
+                <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
+            </connections>
+        </window>
+    </objects>
+</document>

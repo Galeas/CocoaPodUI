@@ -1,0 +1,12 @@
+//
+//  Prefix header
+//
+//  The contents of this file are implicitly included at the beginning of every source file.
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+
+#define RGB(r, g, b)                        [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
+#define RGBA(r, g, b, a)                    [NSColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
+#endif
