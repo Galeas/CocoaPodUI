@@ -1,7 +1,7 @@
 CocoaPodUI
 ==========
 
-XCode plugin that implements CocoaPods GUI.
+Xcode plugin that implements CocoaPods GUI.
 
 Installation Guide
 ==================
