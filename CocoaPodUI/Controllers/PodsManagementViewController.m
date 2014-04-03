@@ -150,7 +150,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     }
     @catch (NSException *exception) {
         if ([[exception reason] isEqualToString:@"launch path not accessible"]) {
-            NSAlert *alert = [NSAlert alertWithMessageText:@"Cocoapods gem not found" defaultButton:@"Close" alternateButton:@"" otherButton:@"" informativeTextWithFormat:@"Seems like Cocoapods gem doesn't installed in your system. Check \"pod\" gem at %@ folder or perform installation by running Terminal command:\n\n\t$ sudo gem install cocoapods", [kPodGemPath stringByDeletingLastPathComponent]];
+            NSAlert *alert = [NSAlert alertWithMessageText:@"Cocoapods gem not found" defaultButton:@"Close" alternateButton:@"" otherButton:@"" informativeTextWithFormat:@"It seems like Cocoapods gem isn't installed on your system. Check \"pod\" gem at %@ folder or perform installation by running Terminal command:\n\n\t$ sudo gem install cocoapods", [kPodGemPath stringByDeletingLastPathComponent]];
             [alert setAlertStyle:NSCriticalAlertStyle];
             [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
             return;
