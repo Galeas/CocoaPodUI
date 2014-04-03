@@ -29,19 +29,29 @@
 #import "PodEditController.h"
 #import "PodsOverlayController.h"
 #import "PodItem.h"
+#import "PodCell.h"
 #import "JMModalOverlay.h"
 
 #import "NSObject+IDEKit.h"
+#import "NSString+Extra.h"
+
+#import <YAMLSerialization.h>
 
 NSString *const kUserDidDeleteAllPods = @"CococaPodUI:UserDidDeleteAllPods";
+
+static NSString *const kReposDidRead = @"CococaPodUI:ReposDidRead";
 
 typedef NS_ENUM(NSUInteger, ProjectFileType) {
     XCodeProject,
     XCodeWorkspace
 };
 
-@interface PodsManagementViewController () <NSTableViewDelegate, JMModalOverlayDelegate, NSFileManagerDelegate, PodEdtitionDelegate>
-
+@interface PodsManagementViewController () <NSTableViewDelegate, NSTableViewDataSource, JMModalOverlayDelegate, NSFileManagerDelegate, PodEdtitionDelegate>
+{
+    @private
+    NSArray *_sortedAvailableKeys;
+    id _reposReadStateObserver;
+}
 @property (copy) NSString *path;
 @property (strong, nonatomic) JMModalOverlay *overlay;
 @property (strong, nonatomic) PodsOverlayController *overlayController;
@@ -53,20 +63,18 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 @property (assign, nonatomic) BOOL changed;
 @property (assign, nonatomic) BOOL needReopenWorkspace;
 @property (assign, nonatomic) BOOL installationSucceded;
+@property (assign, nonatomic) BOOL availablePodsReaded;
 @property (copy) NSError *installationError;
 
 @property (strong, nonatomic) NSMutableString *podfileText;
-@property (strong) IBOutlet NSArrayController *installedArrayController;
-@property (strong) IBOutlet NSArrayController *availableArrayController;
 @property (weak) IBOutlet NSTableView *installedTable;
 @property (weak) IBOutlet NSTableView *availableTable;
 
-- (IBAction)loadPodInfo:(id)sender;
-- (IBAction)addPod:(id)sender;
-- (IBAction)deletePod:(id)sender;
+//- (IBAction)addPod:(id)sender;
+//- (IBAction)deletePod:(id)sender;
 - (IBAction)saveAndInstallAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
-- (IBAction)editPod:(id)sender;
+//- (IBAction)editPod:(id)sender;
 - (IBAction)deleteAllPods:(id)sender;
 @end
 
@@ -86,6 +94,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     
     [super loadView];
     
+    [self setupNotifications];
+    
     JMModalOverlay *overlay = [[JMModalOverlay alloc] init];
     [overlay setAnimates:NO];
     [overlay setDelegate:self];
@@ -97,7 +107,25 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     [overlay setContentViewController:overlayController];
     [self setOverlayController:overlayController];
     
-    [self loadAvailablePods];
+    [self performSelectorInBackground:@selector(loadAvailablePods) withObject:nil];
+}
+
+#pragma mark
+#pragma mark Notification handle
+
+- (void)setupNotifications
+{
+    __weak typeof(self) weakSelf = self;
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    
+    _reposReadStateObserver = [center addObserverForName:kReposDidRead object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+        [weakSelf setAvailablePodsReaded:YES];
+        [weakSelf performSelectorOnMainThread:@selector(completeInstalledPods) withObject:nil waitUntilDone:YES];
+    }];
+    
+    [center addObserver:self selector:@selector(addPod:) name:kAddPodNotificationName object:nil];
+    [center addObserver:self selector:@selector(editPod:) name:kEditPodNotificationName object:nil];
+    [center addObserver:self selector:@selector(deletePod:) name:kDeletePodNotificationName object:nil];
 }
 
 #pragma mark
@@ -105,132 +133,186 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (void)loadPodsWithPath:(NSString *)path
 {
-    NSError *error = nil;
-    NSString *podfileText = [NSString stringWithContentsOfURL:[NSURL fileURLWithPath:path] encoding:NSUTF8StringEncoding error:&error];
+    [self setPath:path];
     
-    __weak typeof(self) weakSelf = self;
-    void(^loadLocalPods)() = ^{
-        if (podfileText && !error) {
-            [self setPodfileText:[podfileText mutableCopy]];
-            
-            NSRange platformNameRange = [podfileText rangeOfString:@":"];
-            if (platformNameRange.location != NSNotFound) {
-                platformNameRange.location += 1;
-                platformNameRange.length = 3;
-                NSString *platformName = [podfileText substringWithRange:platformNameRange];
-                [weakSelf setPlatformName:platformName];
+    NSTask *podfileTask = [[NSTask alloc] init];
+    NSArray *args = @[@"ipc", @"podfile", path, @"--no-color"];
+    [podfileTask setLaunchPath:kPodGemPath];
+    [podfileTask setArguments:args];
+    NSPipe *pipeOut = [NSPipe pipe];
+    [podfileTask setStandardOutput:pipeOut];
+    NSFileHandle *output = [pipeOut fileHandleForReading];
+    NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+    environment[@"LC_ALL"]=@"en_US.UTF-8";
+    [podfileTask setEnvironment:environment];
+    @try {
+        [podfileTask launch];
+    }
+    @catch (NSException *exception) {
+        if ([[exception reason] isEqualToString:@"launch path not accessible"]) {
+            NSAlert *alert = [NSAlert alertWithMessageText:@"Cocoapods gem not found" defaultButton:@"Close" alternateButton:@"" otherButton:@"" informativeTextWithFormat:@"Seems like Cocoapods gem doesn't installed in your system. Check \"pod\" gem at %@ folder or perform installation by running Terminal command:\n\n\t$ sudo gem install cocoapods", [kPodGemPath stringByDeletingLastPathComponent]];
+            [alert setAlertStyle:NSCriticalAlertStyle];
+            [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+            return;
+        }
+    }
+    
+    NSData *yamlData = [output readDataToEndOfFile];
+    if ([yamlData length] > 0) {
+        NSError *error = nil;
+        NSDictionary *obj = [YAMLSerialization objectWithYAMLData:yamlData options:kYAMLReadOptionStringScalars error:&error];
+        if (obj && !error) {
+            NSArray *definitions = [obj valueForKey:@"target_definitions"];
+            if ([definitions count] == 1) {
+                NSDictionary *info = [definitions objectAtIndex:0];
                 
-                NSUInteger firstLineBreakIndex = [podfileText rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].location;
-                if (firstLineBreakIndex != NSNotFound) {
-                    NSString *firstLine = [podfileText substringToIndex:firstLineBreakIndex];
-                    NSRange platformVersionRange = [firstLine rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet] options:NSBackwardsSearch];
-                    BOOL isIOS = [weakSelf.platformName isEqualToString:@"iOS"];
-                    platformVersionRange.length = isIOS ? 3 : 4;
-                    platformVersionRange.location -= platformVersionRange.length - 1;
-                    NSString *platformVersion = [podfileText substringWithRange:platformVersionRange];
-                    [weakSelf setPlatformVersion:platformVersion];
-                }
+                NSDictionary *platformInfo = [info valueForKey:@"platform"];
+                [self setPlatformName:[[platformInfo allKeys] firstObject]];
+                [self setPlatformVersion:[[platformInfo allValues] firstObject]];
                 
-                NSUInteger startPodsIndex = [podfileText rangeOfString:@"pod"].location;
-                if (startPodsIndex != NSNotFound) {
-                    NSString *podsString = [podfileText substringFromIndex:startPodsIndex];
-                    NSArray *strings = [podsString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-                    
-                    NSMutableArray *items = [NSMutableArray array];
-                    [strings enumerateObjectsUsingBlock:^(NSString *string, NSUInteger idx, BOOL *stop) {
-//                        NSLog(@"POD STRING = %@", string);
-                        if ([string length] > 0) {
-                            PodItem *item = [[PodItem alloc] initWithString:string];
-                            if (item) {
-                                [items addObject:item];
-                            }
-                        }
-                    }];
-                    [weakSelf willChangeValueForKey:@"installedPods"];
-                    [weakSelf.installedPods addObjectsFromArray:items];
-                    [weakSelf didChangeValueForKey:@"installedPods"];
-                    
-                    NSString *projectPodsPath = [[weakSelf.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Pods"];
-                    if (![[NSFileManager defaultManager] fileExistsAtPath:projectPodsPath]) {
-                        [weakSelf setChanged:YES];
+                NSArray *dependencies = [info valueForKey:@"dependencies"];
+                NSMutableArray *pods = [NSMutableArray array];
+                __weak typeof(self) weakSelf = self;
+                [dependencies enumerateObjectsUsingBlock:^(id object, NSUInteger idx, BOOL *stop) {
+                    PodItem *item = [[PodItem alloc] init];
+                    if ([object isKindOfClass:[NSString class]]) {
+                        [item setName:object];
+                        [item setVersionModifier:@"Version logic"];
                     }
+                    else if ([object isKindOfClass:[NSDictionary class]]) {
+                        [item setName:[[object allKeys] firstObject]];
+                        NSString *versionString = [[[object allValues] firstObject] firstObject];
+                        NSArray *versionComponents = [versionString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        if ([versionComponents count] == 1) {
+                            if ([[versionComponents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF = %@", @"~>"]] count] == 0) {
+                                [item setVersion:[versionComponents firstObject]];
+                            }
+                            [item setVersionModifier:@"Version logic"];
+                        }
+                        else if ([versionComponents count] > 1) {
+                            [item setVersionModifier:[versionComponents objectAtIndex:0]];
+                            [item setVersion:[versionComponents objectAtIndex:1]];
+                        }
+                    }
+                    if ([item.name length] > 0) {
+                        [pods addObject:item];
+                    }
+                }];
+                [weakSelf setInstalledPods:[[NSArray arrayWithArray:pods] mutableCopy]];
+                
+                if (weakSelf.availablePodsReaded) {
+                    [weakSelf completeInstalledPods];
                 }
+                
+                NSString *podsDirPath = [[self.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Pods"];
+                BOOL isDir;
+                BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:podsDirPath isDirectory:&isDir];
+                [self setChanged:!(exists && isDir)];
+                
+                [self.installedTable reloadData];
             }
         }
-    };
+    }
+}
+
+- (void)completeInstalledPods
+{
+    NSString *podfileLockPath = [[self.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Podfile.lock"];    
+    NSError *error = nil;
     
-    if ([self.path isEqualToString:path]) {
-        if (![self.podfileText isEqualToString:podfileText]) {
-            [self willChangeValueForKey:@"installedPods"];
-            [self.installedPods removeAllObjects];
-            [self didChangeValueForKey:@"installedPods"];
-            
-            loadLocalPods();
+    __weak typeof(self) weakSelf = self;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:podfileLockPath]) {
+        NSString *podfileLockString = [NSString stringWithContentsOfFile:podfileLockPath encoding:NSUTF8StringEncoding error:&error];
+        if (podfileLockString && !error) {
+            NSString *podsSubstring = [podfileLockString stringBetweenString:@"PODS:\n  - " andString:@"DEPENDENCIES:"];
+            podsSubstring = [podsSubstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            NSArray *components = [podsSubstring componentsSeparatedByString:@"\n  - "];
+            [components enumerateObjectsUsingBlock:^(NSString *item, NSUInteger idx, BOOL *stop) {
+                NSArray *parts = [item componentsSeparatedByString:@" "];
+                NSString *name = [parts firstObject];
+                NSCharacterSet *minus = [NSCharacterSet characterSetWithCharactersInString:@"():\n"];
+                NSString *version = [[parts objectAtIndex:1] stringByTrimmingCharactersInSet:minus];
+                NSArray *filteredInstalled = [weakSelf.installedPods filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name = %@", name]];
+                if ([filteredInstalled count] == 1) {
+                    PodItem *installedItem = [filteredInstalled firstObject];
+                    [installedItem setVersion:version];
+                    PodItem *availableItem = [[weakSelf.availablePods filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name = %@", name]] firstObject];
+                    [installedItem setSummary:availableItem.summary];
+                    [installedItem setVersions:availableItem.versions];
+                }
+            }];
         }
     }
     else {
-        [self setPath:path];
-        [self willChangeValueForKey:@"installedPods"];
-        [self.installedPods removeAllObjects];
-        [self didChangeValueForKey:@"installedPods"];
-        
-        loadLocalPods();
+        [self.installedPods enumerateObjectsUsingBlock:^(PodItem *item, NSUInteger idx, BOOL *stop) {
+            PodItem *availableItem = [[weakSelf.availablePods filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.name = %@", item.name]] firstObject];
+            if ([item.version length] == 0) {
+                [item setVersion:availableItem.version];
+            }
+            [item setSummary:availableItem.summary];
+            [item setVersions:availableItem.versions];
+            if (!item.versionModifier) {
+                [item setVersionModifier:@"Version logic"];
+            }
+        }];
     }
 }
 
 - (void)loadAvailablePods
 {
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSTask *availablePodsTask = [[NSTask alloc] init];
-        NSArray *args = @[@"list", @"--update", @"--no-color"];
-        [availablePodsTask setLaunchPath:@"/usr/bin/pod"];
-        [availablePodsTask setArguments:args];
-        NSPipe *pipeOut = [NSPipe pipe];
-        [availablePodsTask setStandardOutput:pipeOut];
-        NSFileHandle *output = [pipeOut fileHandleForReading];
-        NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
-        environment[@"LC_ALL"]=@"en_US.UTF-8";
-        [availablePodsTask setEnvironment:environment];
-        [availablePodsTask launch];
-        NSData *data = [output readDataToEndOfFile];
-        
-        NSString *list = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSArray *pods = [list componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-        NSMutableArray *items = [NSMutableArray array];
-        [pods enumerateObjectsUsingBlock:^(NSString *string, NSUInteger idx, BOOL *stop) {
-            PodItem *item = [[PodItem alloc] initWithName:string];
-            if (item) {
-                [items addObject:item];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *localRepoPath = [NSHomeDirectory() stringByAppendingPathComponent:@".cocoapods/repos/master"];
+    NSError *error = nil;
+    NSArray *localRepoContent = [fileManager contentsOfDirectoryAtPath:localRepoPath error:&error];
+    NSMutableArray *repos = [NSMutableArray array];
+    [localRepoContent enumerateObjectsUsingBlock:^(NSString *podName, NSUInteger idx, BOOL *stop) {
+        NSError *internalError = nil;
+        if (![podName hasPrefix:@"."]) {
+            NSString *podRepoPath = [localRepoPath stringByAppendingPathComponent:podName];
+            NSArray *podVersions = [[fileManager contentsOfDirectoryAtPath:podRepoPath error:&internalError] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSString *maxVersion = [podVersions lastObject];
+            NSString *podspecPath = [[podRepoPath stringByAppendingPathComponent:maxVersion] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.podspec", podName]];
+            BOOL isDir;
+            BOOL exists = [fileManager fileExistsAtPath:podspecPath isDirectory:&isDir];
+            if (exists && !isDir) {
+                NSData *podspecData = [NSData dataWithContentsOfFile:podspecPath];
+                PodItem *item = [[PodItem alloc] init];
+                [item setRepoPath:podspecPath];
+                [item setPodspecData:podspecData];
+                [item setVersions:podVersions];
+                [item setName:podName];
+                [item setVersionModifier:@"Version logic"];
+                [repos addObject:item];
             }
-        }];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf willChangeValueForKey:@"availablePods"];
-            [weakSelf setAvailablePods:[items copy]];
-            [weakSelf didChangeValueForKey:@"availablePods"];
-        });
-    });
+        }
+    }];
+    [self performSelectorOnMainThread:@selector(updateAvailableContent:) withObject:repos waitUntilDone:YES];
+}
+
+- (void)updateAvailableContent:(NSArray*)content
+{
+    [self willChangeValueForKey:@"availablePods"];
+    [self setAvailablePods:[NSArray arrayWithArray:content]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kReposDidRead object:nil];
+    [self didChangeValueForKey:@"availablePods"];
 }
 
 #pragma mark
-#pragma mark TableView Delegate
+#pragma mark TableView Delegate && DataSource
 
-- (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-    PodItem *item = ([tableView tag] == 666) ? [[self.installedArrayController arrangedObjects] objectAtIndex:row] : [[self.availableArrayController arrangedObjects] objectAtIndex:row];
-    CGFloat nameHeight = 25;
-    if (item.podDescription) {
-        CGSize size = [item.podDescription boundingRectWithSize:CGSizeMake(tableView.frame.size.width - 17, CGFLOAT_MAX) options:NSLineBreakByWordWrapping | NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[NSFont fontWithName:@"HelveticaNeue-Italic" size:13]}].size;
-        CGFloat result = 33 + size.height + 8;
-        return result;
-    }
-    return nameHeight + 10;
+    return [self.installedPods count];
 }
 
-- (NSIndexSet *)tableView:(NSTableView *)tableView selectionIndexesForProposedSelection:(NSIndexSet *)proposedSelectionIndexes
+- (NSView*)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    return nil;
+    static NSString *installed = @"installed";
+    PodCell *view = [tableView makeViewWithIdentifier:installed owner:nil];
+    PodItem *item = [self.installedPods objectAtIndex:row];
+    [view setObjectValue:item];
+    
+    return view;
 }
 
 #pragma mark
@@ -301,63 +383,17 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (void)didCompletePodEdition:(PodItem *)item
 {
-    NSString *podInstallationString = [item installStringWithVersion:item.version];
-    NSUInteger startIndex = [self.podfileText rangeOfString:item.name].location;
-    if (startIndex != NSNotFound) {
-        NSUInteger installStringStart = [self.podfileText rangeOfString:@"pod" options:NSBackwardsSearch range:NSMakeRange(0, startIndex)].location;
-        if (installStringStart != NSNotFound) {
-            startIndex = installStringStart;
-            NSUInteger lastIndex = [self.podfileText rangeOfString:@"\n" options:0 range:NSMakeRange(startIndex, [self.podfileText length] - startIndex)].location;
-            if (lastIndex != NSNotFound) {
-//                NSLog(@"Last Index = %ld %s", lastIndex, __PRETTY_FUNCTION__);
-                NSUInteger length = lastIndex - startIndex;
-                NSRange range = NSMakeRange(startIndex, length);
-//                NSLog(@"Edited POD String %@ %s", [self.podfileText substringWithRange:range], __PRETTY_FUNCTION__);
-                [self.podfileText replaceCharactersInRange:range withString:podInstallationString];
-//                NSLog(@"PODFILE TEXT %@", self.podfileText);
-                [[NSFileManager defaultManager] removeItemAtPath:self.path error:NULL];
-                [self.podfileText writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-                [self setChanged:YES];
-            }
-        }
-    }
+    [self setChanged:YES];
 }
 
 #pragma mark
 #pragma mark Service
 
-- (void)loadExtededInfo:(id)sender completion:(void (^)(PodItem*))completion
-{
-    NSTableView *table = [sender tag] == 666 ? self.installedTable : self.availableTable;
-    NSUInteger row = [table rowForView:[sender superview]];
-    PodItem *item = [(NSTableCellView*)[sender superview] objectValue];
-    if (!item.inProgress) {
-        [item setInProgress:YES];
-        NSTableCellView *cell = (NSTableCellView*)[sender superview];
-        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:row];
-        [item loadDescriptionWithCompletion:^{
-            [cell setNeedsLayout:YES];
-            [NSAnimationContext beginGrouping];
-            [[NSAnimationContext currentContext] setDuration:.3];
-            [table noteHeightOfRowsWithIndexesChanged:indexSet];
-            [NSAnimationContext endGrouping];
-            if (completion != nil) {
-                completion(item);
-            }
-        }];
-    }
-    else {
-        if (completion != nil) {
-            completion(item);
-        }
-    }
-}
-
 - (void)installTask:(void(^)(BOOL, NSError*))success
 {
     NSTask *installTask = [[NSTask alloc] init];
     NSArray *args = @[@"install", @"--no-color"];
-    [installTask setLaunchPath:@"/usr/bin/pod"];
+    [installTask setLaunchPath:kPodGemPath];
     [installTask setCurrentDirectoryPath:[self.path stringByDeletingLastPathComponent]];
     [installTask setArguments:args];
     NSPipe *pipeOut = [NSPipe pipe];
@@ -392,6 +428,21 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     [installTask launch];
     
     [installTask waitUntilExit];
+}
+
+- (NSString*)podfileString
+{
+    NSMutableString *result = [NSMutableString string];
+    [result appendFormat:@"platform :%@, '%@'\n", [[self.platformName lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""], self.platformVersion];
+    [self.installedPods enumerateObjectsUsingBlock:^(PodItem *item, NSUInteger idx, BOOL *stop) {
+        if ([item.versionModifier length] == 0 || [item.versionModifier isEqualToString:@"Version logic"]) {
+            [result appendFormat:@"\npod '%@', '%@'", item.name, item.version];
+        }
+        else {
+            [result appendFormat:@"\npod '%@', '%@ %@'", item.name, item.versionModifier, item.version];
+        }
+    }];
+    return [NSString stringWithString:result];
 }
 
 - (void)setPlatformName:(NSString *)platformName
@@ -454,82 +505,52 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 #pragma mark
 #pragma mark IBActions
 
-- (IBAction)loadPodInfo:(id)sender
+- (void)addPod:(NSNotification*)note
 {
-    NSArrayController *aController = nil;
-    NSString *key = nil;
-    NSTableView *table = nil;
-    if ([sender tag] == 666) {
-        aController = self.availableArrayController;
-        key = @"availablePods";
-        table = self.availableTable;
+    PodItem *item = [[note object] copy];
+    if (item) {
+        [self.installedPods addObject:item];
+        NSLog(@"%@", item.versions);
+        [self setChanged:YES];
+        [self.installedTable insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:[self.installedPods indexOfObject:item]] withAnimation:NSTableViewAnimationSlideRight];
     }
-    else {
-        aController = self.installedArrayController;
-        key = @"installedPods";
-        table = self.installedTable;
+}
+
+- (void)editPod:(NSNotification*)note
+{
+    if (!self.editController) {
+        [self setEditController:[[PodEditController alloc] initWithWindowNibName:@"PodEditController"]];
+        [self.editController setDelegate:self];
     }
-    NSTableCellView *cell = (NSTableCellView*)[sender superview];
-    NSInteger row =[table rowForView:cell];
-    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:row];
-    __weak typeof(self) weakSelf = self;
-    [self loadExtededInfo:sender completion:^(PodItem *item) {
-        if (!item) return;
-        
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.name MATCHES %@", item.name];
-        NSArray *filtered = [[aController arrangedObjects] filteredArrayUsingPredicate:predicate];
-        if ([filtered count] == 1) {
-            [weakSelf willChangeValueForKey:key];
-            PodItem *sameItem = [filtered objectAtIndex:0];
-            [sameItem setVersion:item.version];
-            [sameItem setPodDescription:item.podDescription];
-            [sameItem setIOSSupport:item.iOSSupport];
-            [sameItem setOSXSupport:item.OSXSupport];
-            [weakSelf didChangeValueForKey:key];
-            
-            [NSAnimationContext beginGrouping];
-            [[NSAnimationContext currentContext] setDuration:.3];
-            [table noteHeightOfRowsWithIndexesChanged:indexSet];
-            [NSAnimationContext endGrouping];
+    PodItem *item = [note object];
+    if (item) {
+        [self.editController setItem:item];
+        [self setChanged:YES];
+        [NSApp beginSheet:[self.editController window] modalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+    }
+}
+
+- (void)deletePod:(NSNotification*)note
+{
+    PodItem *item = [note object];
+    if (item) {
+        if ([self.installedPods containsObject:item]) {
+            [self setChanged:YES];
+            NSUInteger index = [self.installedPods indexOfObject:item];
+            [self.installedPods removeObject:item];
+            [self.installedTable removeRowsAtIndexes:[NSIndexSet indexSetWithIndex:index] withAnimation:NSTableViewAnimationSlideRight];
         }
-    }];
-}
-
-- (IBAction)addPod:(id)sender
-{
-    __weak typeof(self) weakSelf = self;
-    [self loadExtededInfo:sender completion:^(PodItem *item) {
-        if (!item) return;
-        
-        [weakSelf willChangeValueForKey:@"installedPods"];
-        [weakSelf.installedPods addObject:item];
-        [weakSelf didChangeValueForKey:@"installedPods"];
-        
-        [weakSelf.podfileText appendString:[NSString stringWithFormat:@"%@\n", item.installString]];
-        [weakSelf setChanged:YES];
-    }];
-}
-
-- (IBAction)deletePod:(id)sender
-{
-    PodItem *item = [(NSTableCellView*)[sender superview] objectValue];
-    
-    BOOL hasNewLineAtTheEnd = [self.podfileText rangeOfString:[NSString stringWithFormat:@"%@\n",item.installString]].location != NSNotFound;
-    [self.podfileText replaceOccurrencesOfString:hasNewLineAtTheEnd ? [NSString stringWithFormat:@"%@\n",item.installString] : item.installString withString:@"" options:NSLiteralSearch range:NSMakeRange(0, [self.podfileText length])];
-    [self setPodfileText:[[self.podfileText stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy]];
-    [self.podfileText appendString:([self.podfileText rangeOfString:@"pod"].location != NSNotFound) ? @"" : @"\n"];
-    
-    [self willChangeValueForKey:@"installedPods"];
-    [self.installedPods removeObject:item];
-    [self didChangeValueForKey:@"installedPods"];
-    
-    [self setChanged:YES];
+    }
 }
 
 - (IBAction)saveAndInstallAction:(id)sender
 {
+    NSString *podfileString = [self podfileString];
     NSError *error = nil;
-    BOOL saveSuccess = [self.podfileText writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:&error];
+    
+    NSLog(@"%@", podfileString);
+    BOOL saveSuccess = [podfileString writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:&error];
+    NSLog(@"%@", self.path);
 
     if (saveSuccess && !error) {
         if (![self.overlay isShown]) {
@@ -543,26 +564,6 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 {
     [[[self view] window] close];
     [NSApp endSheet:[[self view] window]];
-}
-
-- (IBAction)editPod:(id)sender
-{
-    if (!self.editController) {
-        [self setEditController:[[PodEditController alloc] initWithWindowNibName:@"PodEditController"]];
-        [self.editController setDelegate:self];
-    }
-    PodItem *item = [(NSTableCellView*)[sender superview] objectValue];
-    __weak typeof(self) weakSelf = self;
-    void (^openEditSheetCompletion)(void) = ^{
-        [weakSelf.editController setItem:item];
-        [NSApp beginSheet:[weakSelf.editController window] modalForWindow:[[weakSelf view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
-    };
-    if (!item.availableVersions) {
-        [item loadDescriptionWithCompletion:openEditSheetCompletion];
-    }
-    else {
-        openEditSheetCompletion();
-    }
 }
 
 - (IBAction)deleteAllPods:(id)sender
@@ -629,5 +630,14 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     }
     
 //    [[NSNotificationCenter defaultCenter] postNotificationName:kUserDidDeleteAllPods object:nil];
+}
+
+#pragma mark
+#pragma mark Memory
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:_reposReadStateObserver];
+    _reposReadStateObserver = nil;
 }
 @end

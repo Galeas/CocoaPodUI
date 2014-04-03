@@ -15,17 +15,17 @@
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="240" width="160" height="110"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1178"/>
+            <rect key="contentRect" x="196" y="240" width="241" height="110"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1028"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="160" height="110"/>
+                <rect key="frame" x="0.0" y="0.0" width="241" height="110"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bq9-11-bpr">
-                        <rect key="frame" x="72" y="13" width="74" height="32"/>
+                        <rect key="frame" x="145" y="13" width="82" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <constraints>
-                            <constraint firstAttribute="width" constant="62" id="F7h-MG-mJH"/>
+                            <constraint firstAttribute="width" constant="70" id="F7h-MG-mJH"/>
                             <constraint firstAttribute="height" constant="21" id="rhK-fY-dd6"/>
                         </constraints>
                         <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="yuD-SX-jkx">
@@ -57,15 +57,15 @@
                         </connections>
                     </textField>
                     <popUpButton translatesAutoresizingMaskIntoConstraints="NO" id="G0a-O6-fPU">
-                        <rect key="frame" x="70" y="65" width="70" height="27"/>
+                        <rect key="frame" x="149" y="62" width="75" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <constraints>
                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="70" id="2Pp-60-Kci"/>
                             <constraint firstAttribute="height" constant="27" id="Yje-dJ-caw"/>
                         </constraints>
-                        <popUpButtonCell key="cell" type="bevel" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" inset="2" selectedItem="vAd-QD-ugp" id="iKs-GV-ndh">
+                        <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" inset="2" selectedItem="vAd-QD-ugp" id="iKs-GV-ndh">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" size="16" name="HelveticaNeue-Light"/>
+                            <font key="font" metaFont="menu"/>
                             <menu key="menu" title="OtherViews" id="kZZ-BE-33i">
                                 <items>
                                     <menuItem title="Item 1" state="on" id="vAd-QD-ugp"/>
@@ -75,20 +75,45 @@
                             </menu>
                         </popUpButtonCell>
                         <connections>
-                            <binding destination="-2" name="content" keyPath="self.item.availableVersions" id="xDa-2G-E6b"/>
-                            <binding destination="-2" name="selectedValue" keyPath="self.item.version" previousBinding="xDa-2G-E6b" id="EOy-Tf-31X"/>
+                            <binding destination="-2" name="selectedValue" keyPath="self.item.version" previousBinding="IWf-Dr-LT2" id="PM6-4C-tr7"/>
+                            <binding destination="-2" name="content" keyPath="self.item.versions" id="IWf-Dr-LT2"/>
+                        </connections>
+                    </popUpButton>
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="F0D-z5-U2z">
+                        <rect key="frame" x="68" y="62" width="76" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="71" id="ZU8-cv-v6I"/>
+                        </constraints>
+                        <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="1Ng-gt-vAG" id="tsS-pg-wy6">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="menu"/>
+                            <menu key="menu" title="OtherViews" id="PG1-u1-tOQ">
+                                <items>
+                                    <menuItem title="Item 1" state="on" id="1Ng-gt-vAG"/>
+                                    <menuItem title="Item 2" id="tBS-MM-uWK"/>
+                                    <menuItem title="Item 3" id="e0P-Bp-eYC"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <binding destination="-2" name="content" keyPath="self.item.possibleVersionModifiers" id="0V2-pi-jEF"/>
+                            <binding destination="-2" name="selectedValue" keyPath="self.item.versionModifier" previousBinding="0V2-pi-jEF" id="zBB-ho-iFd"/>
                         </connections>
                     </popUpButton>
                 </subviews>
                 <constraints>
                     <constraint firstItem="bq9-11-bpr" firstAttribute="top" secondItem="G0a-O6-fPU" secondAttribute="bottom" constant="24" id="80s-cH-bYj"/>
                     <constraint firstAttribute="bottom" secondItem="bq9-11-bpr" secondAttribute="bottom" constant="20" id="F7a-Eo-i0n"/>
+                    <constraint firstItem="F0D-z5-U2z" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="18" id="Jfx-RM-t8B"/>
+                    <constraint firstAttribute="trailing" secondItem="G0a-O6-fPU" secondAttribute="trailing" constant="20" id="SZB-Wu-smA"/>
                     <constraint firstItem="ecM-nn-aew" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="20" id="Vd2-om-TUC"/>
-                    <constraint firstItem="G0a-O6-fPU" firstAttribute="leading" secondItem="ecM-nn-aew" secondAttribute="trailing" constant="8" id="dHd-dt-usv"/>
+                    <constraint firstItem="G0a-O6-fPU" firstAttribute="height" secondItem="F0D-z5-U2z" secondAttribute="height" id="bgm-Nf-Atx"/>
                     <constraint firstItem="G0a-O6-fPU" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="18" id="dP1-No-MtC"/>
+                    <constraint firstItem="G0a-O6-fPU" firstAttribute="leading" secondItem="F0D-z5-U2z" secondAttribute="trailing" constant="10" id="hlm-a1-kgW"/>
                     <constraint firstItem="ecM-nn-aew" firstAttribute="leading" secondItem="se5-gp-TjO" secondAttribute="leading" constant="22" id="jP4-04-ieg"/>
                     <constraint firstAttribute="trailing" secondItem="bq9-11-bpr" secondAttribute="trailing" constant="20" id="lF5-T9-9ZN"/>
-                    <constraint firstAttribute="trailing" secondItem="G0a-O6-fPU" secondAttribute="trailing" constant="20" id="xv6-eF-7Pl"/>
+                    <constraint firstItem="F0D-z5-U2z" firstAttribute="leading" secondItem="ecM-nn-aew" secondAttribute="trailing" constant="8" id="mzH-tW-zdn"/>
                 </constraints>
             </view>
             <connections>

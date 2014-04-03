@@ -58,7 +58,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath isEqualToString:@"version"]) {
-        NSLog(@"POD CHANGE VERSION %s", __PRETTY_FUNCTION__);
+//        NSLog(@"POD CHANGE VERSION %s", __PRETTY_FUNCTION__);
         if ([self.delegate respondsToSelector:@selector(didCompletePodEdition:)]) {
             [self.delegate didCompletePodEdition:self.item];
         }

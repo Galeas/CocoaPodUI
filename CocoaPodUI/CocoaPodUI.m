@@ -29,6 +29,7 @@
 #import "Controllers/MainWindowController.h"
 
 #import "NSObject+IDEKit.h"
+#import <YAMLSerialization.h>
 
 #define kMenuItemTag 666
 
@@ -51,6 +52,7 @@
     self = [super init];
     if (self) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+        [self findGemLocation];
     }
     return self;
 }
@@ -67,6 +69,29 @@
         [newMenuItem setTag:kMenuItemTag];
         [[editMenuItem submenu] addItem:newMenuItem];
     }
+}
+
+- (void)findGemLocation
+{
+    NSTask *gemTask = [[NSTask alloc] init];
+    [gemTask setLaunchPath:@"/usr/bin/gem"];
+    [gemTask setArguments:@[@"environment"]];
+    NSPipe *pipeOut = [NSPipe pipe];
+    [gemTask setStandardOutput:pipeOut];
+    NSFileHandle *output = [pipeOut fileHandleForReading];
+    NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+    environment[@"LC_ALL"]=@"en_US.UTF-8";
+    [gemTask setEnvironment:environment];
+    [gemTask launch];
+    NSData *data = [output readDataToEndOfFile];
+    NSDictionary *dict = [YAMLSerialization objectWithYAMLData:data options:kYAMLReadOptionStringScalars error:NULL];
+    NSArray *values = [dict valueForKey:@"RubyGems Environment"];
+    NSArray *execDirArr = [values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.%@ != NULL", @"EXECUTABLE DIRECTORY"]];
+    if ([execDirArr count] == 1) {
+        NSString *path = [[[execDirArr firstObject] allValues] firstObject];
+        kPodGemPath = [path stringByAppendingPathComponent:@"pod"];
+    }
+    NSLog(@"%@", kPodGemPath);
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem

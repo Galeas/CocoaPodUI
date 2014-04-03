@@ -28,5 +28,8 @@
 #import <Cocoa/Cocoa.h>
 
 @interface PodCell : NSTableCellView
-
+@property (weak) IBOutlet NSTextField *versionLabel;
+@property (weak) IBOutlet NSTextField *summaryLabel;
+@property (weak) IBOutlet NSButton *actionButton;
+@property (weak) IBOutlet NSButton *editButton;
 @end

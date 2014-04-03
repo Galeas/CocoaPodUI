@@ -7,9 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PodsManagementViewController">
             <connections>
-                <outlet property="availableArrayController" destination="pXf-Ea-Zmh" id="Tpd-Oo-Fn5"/>
                 <outlet property="availableTable" destination="S9E-vT-gHo" id="1JM-Qa-zeV"/>
-                <outlet property="installedArrayController" destination="ywO-R5-7V8" id="BQU-Op-sOc"/>
                 <outlet property="installedTable" destination="eCO-Lk-Fnc" id="OtI-zV-MsU"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
@@ -20,12 +18,12 @@
             <rect key="frame" x="0.0" y="0.0" width="621" height="420"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <splitView dividerStyle="paneSplitter" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tYU-yx-pAJ">
+                <splitView dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tYU-yx-pAJ">
                     <rect key="frame" x="0.0" y="61" width="621" height="359"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <subviews>
                         <customView id="dZr-PL-2Bo">
-                            <rect key="frame" x="0.0" y="0.0" width="308" height="359"/>
+                            <rect key="frame" x="0.0" y="0.0" width="313" height="359"/>
                             <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="74" horizontalPageScroll="10" verticalLineScroll="74" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v3n-0d-Xa8">
@@ -35,14 +33,14 @@
                                         <rect key="frame" x="0.0" y="0.0" width="308" height="318"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
-                                            <tableView verticalHuggingPriority="750" tag="666" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="72" rowSizeStyle="automatic" viewBased="YES" id="eCO-Lk-Fnc">
+                                            <tableView verticalHuggingPriority="750" tag="666" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="72" rowSizeStyle="automatic" viewBased="YES" id="eCO-Lk-Fnc">
                                                 <rect key="frame" x="0.0" y="0.0" width="308" height="318"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <size key="intercellSpacing" width="3" height="2"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                 <tableColumns>
-                                                    <tableColumn width="305" minWidth="40" maxWidth="1000" id="hHO-Di-KeU">
+                                                    <tableColumn identifier="installed" width="305" minWidth="40" maxWidth="1000" id="hHO-Di-KeU">
                                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                             <font key="font" metaFont="smallSystem"/>
                                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -55,7 +53,7 @@
                                                         </textFieldCell>
                                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                         <prototypeCellViews>
-                                                            <tableCellView id="PgK-12-CAv">
+                                                            <tableCellView id="PgK-12-CAv" customClass="PodCell">
                                                                 <rect key="frame" x="1" y="1" width="305" height="72"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
@@ -72,11 +70,7 @@
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="PgK-12-CAv" name="displayPatternValue1" keyPath="objectValue.name" id="ZQF-iz-pFE">
-                                                                                <dictionary key="options">
-                                                                                    <string key="NSDisplayPattern">%{value1}@</string>
-                                                                                </dictionary>
-                                                                            </binding>
+                                                                            <binding destination="PgK-12-CAv" name="value" keyPath="objectValue.name" id="gcc-UA-G4g"/>
                                                                         </connections>
                                                                     </textField>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jVj-Rs-eQj">
@@ -91,52 +85,50 @@
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="PgK-12-CAv" name="value" keyPath="objectValue.podDescription" id="b0U-eE-Cd8"/>
+                                                                            <binding destination="PgK-12-CAv" name="hidden" keyPath="objectValue.summary" id="3RR-mX-ijr">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSValueTransformerName">NSIsNil</string>
+                                                                                </dictionary>
+                                                                            </binding>
+                                                                            <binding destination="PgK-12-CAv" name="value" keyPath="objectValue.summary" id="fgb-Zy-O7v"/>
                                                                         </connections>
                                                                     </textField>
-                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="666" translatesAutoresizingMaskIntoConstraints="NO" id="CAn-Fw-elY">
+                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WoI-BE-FPy">
                                                                         <rect key="frame" x="273" y="44" width="20" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="width" constant="20" id="bDz-W4-4ky"/>
-                                                                            <constraint firstAttribute="height" constant="20" id="rEN-w4-by5"/>
-                                                                        </constraints>
-                                                                        <buttonCell key="cell" type="bevel" bezelStyle="regularSquare" image="info" imagePosition="overlaps" alignment="center" imageScaling="proportionallyDown" id="I10-Nl-Uga">
-                                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                            <font key="font" metaFont="system"/>
-                                                                        </buttonCell>
-                                                                        <connections>
-                                                                            <action selector="loadPodInfo:" target="-2" id="cuH-W9-NbP"/>
-                                                                        </connections>
-                                                                    </button>
-                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WoI-BE-FPy">
-                                                                        <rect key="frame" x="248" y="44" width="20" height="20"/>
-                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="20" id="UFi-CF-DHr"/>
-                                                                            <constraint firstAttribute="height" constant="20" id="cO8-KK-Swe"/>
+                                                                            <constraint firstAttribute="height" constant="20" id="htB-iq-QZ3"/>
+                                                                            <constraint firstAttribute="width" constant="20" id="uEJ-vk-c9N"/>
                                                                         </constraints>
                                                                         <buttonCell key="cell" type="bevel" bezelStyle="circular" image="minus" imagePosition="only" alignment="center" controlSize="small" imageScaling="proportionallyDown" id="Fan-s7-39m">
                                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                             <font key="font" metaFont="smallSystem"/>
                                                                         </buttonCell>
                                                                         <connections>
-                                                                            <action selector="deletePod:" target="-2" id="42b-mZ-ehM"/>
+                                                                            <binding destination="PgK-12-CAv" name="target" keyPath="objectValue" id="AUR-rq-7iH">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSSelectorName">deleteAction</string>
+                                                                                </dictionary>
+                                                                            </binding>
                                                                         </connections>
                                                                     </button>
                                                                     <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cFX-tF-Wo5">
-                                                                        <rect key="frame" x="225" y="47" width="15" height="15"/>
+                                                                        <rect key="frame" x="250" y="46" width="15" height="15"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="width" constant="15" id="XTF-0K-k0B"/>
-                                                                            <constraint firstAttribute="height" constant="15" id="wfp-Ya-jmY"/>
+                                                                            <constraint firstAttribute="width" constant="15" id="5g2-7G-7lP"/>
+                                                                            <constraint firstAttribute="height" constant="15" id="snV-Kj-Sp4"/>
                                                                         </constraints>
-                                                                        <buttonCell key="cell" type="bevel" bezelStyle="circular" image="edit" imagePosition="only" alignment="center" controlSize="small" imageScaling="proportionallyDown" id="OKz-1g-C0F">
+                                                                        <buttonCell key="cell" type="bevel" bezelStyle="circular" image="edit" imagePosition="overlaps" alignment="center" controlSize="small" imageScaling="proportionallyDown" id="OKz-1g-C0F">
                                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                             <font key="font" metaFont="smallSystem"/>
                                                                         </buttonCell>
                                                                         <connections>
-                                                                            <action selector="editPod:" target="-2" id="SGJ-pd-iEq"/>
+                                                                            <binding destination="PgK-12-CAv" name="target" keyPath="objectValue" id="cpk-TC-wtF">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSSelectorName">editAction</string>
+                                                                                </dictionary>
+                                                                            </binding>
                                                                         </connections>
                                                                     </button>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="imR-2c-0l4">
@@ -152,39 +144,38 @@
                                                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="PgK-12-CAv" name="hidden" keyPath="objectValue.version" id="FDg-wp-BLr">
+                                                                            <binding destination="PgK-12-CAv" name="value" keyPath="objectValue.version" id="Hge-3m-1m3"/>
+                                                                            <binding destination="PgK-12-CAv" name="hidden" keyPath="objectValue.version" id="Pip-kw-3tk">
                                                                                 <dictionary key="options">
                                                                                     <string key="NSValueTransformerName">NSIsNil</string>
                                                                                 </dictionary>
                                                                             </binding>
-                                                                            <binding destination="PgK-12-CAv" name="value" keyPath="objectValue.version" id="Mea-jX-I36"/>
                                                                         </connections>
                                                                     </textField>
                                                                 </subviews>
                                                                 <constraints>
                                                                     <constraint firstItem="jVj-Rs-eQj" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="33" id="3FM-dS-mQS"/>
-                                                                    <constraint firstItem="WoI-BE-FPy" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="8" id="9Gg-1a-6Aj"/>
-                                                                    <constraint firstItem="WoI-BE-FPy" firstAttribute="leading" secondItem="cFX-tF-Wo5" secondAttribute="trailing" constant="8" id="DlQ-Ab-UMg"/>
-                                                                    <constraint firstItem="imR-2c-0l4" firstAttribute="leading" secondItem="Ovh-eK-gIH" secondAttribute="trailing" constant="8" id="OZy-sB-c3Z"/>
+                                                                    <constraint firstItem="cFX-tF-Wo5" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="11" id="3b2-sp-HKo"/>
+                                                                    <constraint firstItem="WoI-BE-FPy" firstAttribute="leading" secondItem="cFX-tF-Wo5" secondAttribute="trailing" constant="8" id="EFy-MR-FFQ"/>
+                                                                    <constraint firstItem="WoI-BE-FPy" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="8" id="OaM-O8-JDm"/>
                                                                     <constraint firstItem="Ovh-eK-gIH" firstAttribute="leading" secondItem="PgK-12-CAv" secondAttribute="leading" constant="5" id="P9s-Mn-bFP"/>
                                                                     <constraint firstItem="imR-2c-0l4" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="5" id="Rf8-2w-dXb"/>
-                                                                    <constraint firstAttribute="trailing" secondItem="CAn-Fw-elY" secondAttribute="trailing" constant="12" id="TFh-wx-jla"/>
                                                                     <constraint firstItem="Ovh-eK-gIH" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="5" id="XfI-X6-DXz"/>
-                                                                    <constraint firstItem="cFX-tF-Wo5" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="10" id="dWx-jT-lUz"/>
+                                                                    <constraint firstItem="imR-2c-0l4" firstAttribute="leading" secondItem="Ovh-eK-gIH" secondAttribute="trailing" constant="8" id="fiK-rw-BWz"/>
                                                                     <constraint firstAttribute="trailing" secondItem="jVj-Rs-eQj" secondAttribute="trailing" constant="12" id="kJk-X9-ceM"/>
-                                                                    <constraint firstItem="CAn-Fw-elY" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="8" id="kW6-hn-7lc"/>
-                                                                    <constraint firstItem="CAn-Fw-elY" firstAttribute="leading" secondItem="WoI-BE-FPy" secondAttribute="trailing" constant="5" id="mR9-7F-pyP"/>
                                                                     <constraint firstItem="jVj-Rs-eQj" firstAttribute="leading" secondItem="PgK-12-CAv" secondAttribute="leading" constant="5" id="zG8-l6-nXI"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="WoI-BE-FPy" secondAttribute="trailing" constant="12" id="zHY-Iu-MSJ"/>
                                                                 </constraints>
                                                                 <connections>
-                                                                    <outlet property="textField" destination="Ovh-eK-gIH" id="YBm-n3-gmg"/>
+                                                                    <outlet property="actionButton" destination="WoI-BE-FPy" id="7jH-zW-KfV"/>
+                                                                    <outlet property="editButton" destination="cFX-tF-Wo5" id="8FF-wQ-qVH"/>
                                                                 </connections>
                                                             </tableCellView>
                                                         </prototypeCellViews>
                                                     </tableColumn>
                                                 </tableColumns>
                                                 <connections>
-                                                    <binding destination="ywO-R5-7V8" name="content" keyPath="arrangedObjects" id="gH4-Ss-XQS"/>
+                                                    <outlet property="dataSource" destination="-2" id="uXM-Tl-1cN"/>
                                                     <outlet property="delegate" destination="-2" id="lk1-vT-13r"/>
                                                 </connections>
                                             </tableView>
@@ -257,7 +248,6 @@
                                     </buttonCell>
                                     <connections>
                                         <action selector="deleteAllPods:" target="-2" id="Mm1-EH-5bP"/>
-                                        <binding destination="ywO-R5-7V8" name="enabled" keyPath="arrangedObjects.@count" id="V4p-js-Ehf"/>
                                     </connections>
                                 </button>
                             </subviews>
@@ -265,7 +255,7 @@
                                 <constraint firstItem="W3I-j6-l02" firstAttribute="leading" secondItem="dZr-PL-2Bo" secondAttribute="leading" constant="20" id="5Kq-0D-d00"/>
                                 <constraint firstAttribute="bottom" secondItem="v3n-0d-Xa8" secondAttribute="bottom" id="8Bv-ez-K6U"/>
                                 <constraint firstItem="i40-1o-3ix" firstAttribute="leading" secondItem="W3I-j6-l02" secondAttribute="trailing" constant="8" id="CRV-PJ-5tB"/>
-                                <constraint firstAttribute="trailing" secondItem="v3n-0d-Xa8" secondAttribute="trailing" id="HAs-nu-IdW"/>
+                                <constraint firstAttribute="trailing" secondItem="v3n-0d-Xa8" secondAttribute="trailing" constant="5" id="HAs-nu-IdW"/>
                                 <constraint firstItem="f41-2d-PAk" firstAttribute="leading" secondItem="i40-1o-3ix" secondAttribute="trailing" constant="11" id="JAL-ch-6Or"/>
                                 <constraint firstItem="f41-2d-PAk" firstAttribute="top" secondItem="dZr-PL-2Bo" secondAttribute="top" constant="10" id="RIS-eK-dkD"/>
                                 <constraint firstItem="v3n-0d-Xa8" firstAttribute="top" secondItem="i40-1o-3ix" secondAttribute="bottom" constant="10" id="bYe-6W-atA"/>
@@ -275,7 +265,7 @@
                             </constraints>
                         </customView>
                         <customView focusRingType="none" id="6hu-Et-oq7">
-                            <rect key="frame" x="318" y="0.0" width="303" height="359"/>
+                            <rect key="frame" x="314" y="0.0" width="307" height="359"/>
                             <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <scrollView focusRingType="none" borderType="none" autohidesScrollers="YES" horizontalLineScroll="74" horizontalPageScroll="10" verticalLineScroll="74" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wTx-mS-MXy">
@@ -285,14 +275,14 @@
                                         <rect key="frame" x="0.0" y="0.0" width="303" height="318"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
-                                            <tableView verticalHuggingPriority="750" tag="999" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="72" rowSizeStyle="automatic" viewBased="YES" id="S9E-vT-gHo">
+                                            <tableView verticalHuggingPriority="750" tag="999" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" alternatingRowBackgroundColors="YES" columnReordering="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="72" rowSizeStyle="automatic" viewBased="YES" id="S9E-vT-gHo">
                                                 <rect key="frame" x="0.0" y="0.0" width="303" height="318"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <size key="intercellSpacing" width="3" height="2"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                 <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                 <tableColumns>
-                                                    <tableColumn width="300" minWidth="40" maxWidth="1000" id="G9n-PP-cCP">
+                                                    <tableColumn identifier="" width="300" minWidth="40" maxWidth="1000" id="G9n-PP-cCP">
                                                         <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Available Pods">
                                                             <font key="font" metaFont="smallSystem"/>
                                                             <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -305,7 +295,7 @@
                                                         </textFieldCell>
                                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                         <prototypeCellViews>
-                                                            <tableCellView id="Bmu-7S-Dah">
+                                                            <tableCellView id="Bmu-7S-Dah" customClass="PodCell">
                                                                 <rect key="frame" x="1" y="1" width="300" height="72"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
@@ -322,11 +312,7 @@
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="Bmu-7S-Dah" name="displayPatternValue1" keyPath="objectValue.name" id="lpF-wC-L1e">
-                                                                                <dictionary key="options">
-                                                                                    <string key="NSDisplayPattern">%{value1}@</string>
-                                                                                </dictionary>
-                                                                            </binding>
+                                                                            <binding destination="Bmu-7S-Dah" name="value" keyPath="objectValue.name" id="Lp2-p0-LyF"/>
                                                                         </connections>
                                                                     </textField>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="l6h-pR-jcg">
@@ -341,37 +327,31 @@
                                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="Bmu-7S-Dah" name="value" keyPath="objectValue.podDescription" id="cZN-CD-wng"/>
+                                                                            <binding destination="Bmu-7S-Dah" name="hidden" keyPath="objectValue.summary" id="3wp-Qs-eMF">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSValueTransformerName">NSIsNil</string>
+                                                                                </dictionary>
+                                                                            </binding>
+                                                                            <binding destination="Bmu-7S-Dah" name="value" keyPath="objectValue.summary" id="Isx-ex-2jT"/>
                                                                         </connections>
                                                                     </textField>
-                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="999" translatesAutoresizingMaskIntoConstraints="NO" id="zgV-6I-M8T">
+                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mjm-HZ-Lxi">
                                                                         <rect key="frame" x="273" y="44" width="20" height="20"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="height" constant="20" id="QMG-Ka-bgm"/>
-                                                                            <constraint firstAttribute="width" constant="20" id="oQx-xX-wcj"/>
-                                                                        </constraints>
-                                                                        <buttonCell key="cell" type="bevel" bezelStyle="regularSquare" image="info" imagePosition="overlaps" alignment="center" imageScaling="proportionallyDown" id="cbG-5O-bMt">
-                                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                            <font key="font" metaFont="system"/>
-                                                                        </buttonCell>
-                                                                        <connections>
-                                                                            <action selector="loadPodInfo:" target="-2" id="0NL-pY-cMD"/>
-                                                                        </connections>
-                                                                    </button>
-                                                                    <button horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mjm-HZ-Lxi">
-                                                                        <rect key="frame" x="248" y="44" width="20" height="20"/>
-                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="20" id="Ab1-L5-0tv"/>
-                                                                            <constraint firstAttribute="height" constant="20" id="O7J-8r-TQ3"/>
+                                                                            <constraint firstAttribute="height" constant="20" id="A07-u4-Rdw"/>
+                                                                            <constraint firstAttribute="width" constant="20" id="jGc-WU-2xY"/>
                                                                         </constraints>
                                                                         <buttonCell key="cell" type="bevel" bezelStyle="circular" image="plus" imagePosition="only" alignment="center" controlSize="small" imageScaling="proportionallyDown" id="slb-fX-ltV">
                                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                             <font key="font" metaFont="smallSystem"/>
                                                                         </buttonCell>
                                                                         <connections>
-                                                                            <action selector="addPod:" target="-2" id="AkY-zK-R6D"/>
+                                                                            <binding destination="Bmu-7S-Dah" name="target" keyPath="objectValue" id="i3h-Xd-huX">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSSelectorName">addAction</string>
+                                                                                </dictionary>
+                                                                            </binding>
                                                                         </connections>
                                                                     </button>
                                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j4v-8E-sYK">
@@ -387,38 +367,38 @@
                                                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                                         </textFieldCell>
                                                                         <connections>
-                                                                            <binding destination="Bmu-7S-Dah" name="hidden" keyPath="objectValue.version" id="CHH-l1-Qwm">
+                                                                            <binding destination="Bmu-7S-Dah" name="value" keyPath="objectValue.version" id="mPV-Fe-GUl"/>
+                                                                            <binding destination="Bmu-7S-Dah" name="hidden" keyPath="objectValue.version" id="pDb-8F-EIW">
                                                                                 <dictionary key="options">
                                                                                     <string key="NSValueTransformerName">NSIsNil</string>
                                                                                 </dictionary>
                                                                             </binding>
-                                                                            <binding destination="Bmu-7S-Dah" name="value" keyPath="objectValue.version" id="Gl8-DD-tw8"/>
                                                                         </connections>
                                                                     </textField>
                                                                 </subviews>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="trailing" secondItem="zgV-6I-M8T" secondAttribute="trailing" constant="7" id="1m9-za-2xF"/>
                                                                     <constraint firstItem="j4v-8E-sYK" firstAttribute="leading" secondItem="qIQ-G8-tgR" secondAttribute="trailing" constant="8" id="2kD-Ju-dyv"/>
-                                                                    <constraint firstItem="zgV-6I-M8T" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="8" id="9Ml-ai-xh2"/>
+                                                                    <constraint firstItem="mjm-HZ-Lxi" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="8" id="5eg-Jc-Yrj"/>
                                                                     <constraint firstItem="qIQ-G8-tgR" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="5" id="Fvd-F0-BlU"/>
                                                                     <constraint firstAttribute="trailing" secondItem="l6h-pR-jcg" secondAttribute="trailing" constant="7" id="Ijc-Dh-wRA"/>
                                                                     <constraint firstItem="qIQ-G8-tgR" firstAttribute="leading" secondItem="Bmu-7S-Dah" secondAttribute="leading" constant="5" id="M6l-Yy-zUD"/>
                                                                     <constraint firstItem="l6h-pR-jcg" firstAttribute="leading" secondItem="Bmu-7S-Dah" secondAttribute="leading" constant="5" id="NhX-o4-f6r"/>
                                                                     <constraint firstItem="l6h-pR-jcg" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="33" id="ROm-Qe-g2K"/>
-                                                                    <constraint firstItem="mjm-HZ-Lxi" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="8" id="X2h-xr-FgG"/>
-                                                                    <constraint firstItem="zgV-6I-M8T" firstAttribute="leading" secondItem="mjm-HZ-Lxi" secondAttribute="trailing" constant="5" id="xA7-7M-aaH"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="mjm-HZ-Lxi" secondAttribute="trailing" constant="7" id="u5W-Tz-rPw"/>
                                                                     <constraint firstItem="j4v-8E-sYK" firstAttribute="top" secondItem="Bmu-7S-Dah" secondAttribute="top" constant="5" id="xCA-3r-prE"/>
                                                                 </constraints>
                                                                 <connections>
+                                                                    <outlet property="actionButton" destination="mjm-HZ-Lxi" id="DyZ-fC-Nv0"/>
+                                                                    <outlet property="summaryLabel" destination="l6h-pR-jcg" id="VQn-XV-wnH"/>
                                                                     <outlet property="textField" destination="qIQ-G8-tgR" id="3P2-oG-nXW"/>
+                                                                    <outlet property="versionLabel" destination="j4v-8E-sYK" id="VVS-rY-Xdt"/>
                                                                 </connections>
                                                             </tableCellView>
                                                         </prototypeCellViews>
                                                     </tableColumn>
                                                 </tableColumns>
                                                 <connections>
-                                                    <binding destination="pXf-Ea-Zmh" name="content" keyPath="arrangedObjects" id="VhN-Bd-Zgb"/>
-                                                    <outlet property="delegate" destination="-2" id="FxO-Dj-kRD"/>
+                                                    <binding destination="IcY-LW-nC8" name="content" keyPath="arrangedObjects" id="XLj-Nk-j7R"/>
                                                 </connections>
                                             </tableView>
                                         </subviews>
@@ -434,7 +414,7 @@
                                     </scroller>
                                 </scrollView>
                                 <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="1eh-n7-GDx">
-                                    <rect key="frame" x="136" y="164" width="32" height="32"/>
+                                    <rect key="frame" x="138" y="164" width="32" height="32"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <connections>
                                         <binding destination="-2" name="animate" keyPath="availablePods" id="iBJ-kQ-6Zr">
@@ -461,7 +441,7 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     </searchFieldCell>
                                     <connections>
-                                        <binding destination="pXf-Ea-Zmh" name="predicate" keyPath="filterPredicate" id="skh-6G-CqP">
+                                        <binding destination="IcY-LW-nC8" name="predicate" keyPath="filterPredicate" id="gyf-sf-JT3">
                                             <dictionary key="options">
                                                 <string key="NSDisplayName">predicate</string>
                                                 <string key="NSPredicateFormat">name contains[c] $value</string>
@@ -471,13 +451,13 @@
                                 </searchField>
                             </subviews>
                             <constraints>
-                                <constraint firstAttribute="trailing" secondItem="5It-ay-SXb" secondAttribute="trailing" id="6LZ-tP-t9J"/>
+                                <constraint firstAttribute="trailing" secondItem="5It-ay-SXb" secondAttribute="trailing" constant="4" id="6LZ-tP-t9J"/>
                                 <constraint firstAttribute="centerY" secondItem="1eh-n7-GDx" secondAttribute="centerY" id="GiV-Dn-1g5"/>
                                 <constraint firstItem="wTx-mS-MXy" firstAttribute="top" secondItem="6hu-Et-oq7" secondAttribute="top" constant="41" id="LuQ-fI-dqk"/>
                                 <constraint firstItem="5It-ay-SXb" firstAttribute="leading" secondItem="6hu-Et-oq7" secondAttribute="leading" id="TKS-bs-LVE"/>
                                 <constraint firstItem="wTx-mS-MXy" firstAttribute="leading" secondItem="6hu-Et-oq7" secondAttribute="leading" id="glL-hl-lzT"/>
                                 <constraint firstAttribute="bottom" secondItem="wTx-mS-MXy" secondAttribute="bottom" id="kXh-jF-Oud"/>
-                                <constraint firstAttribute="trailing" secondItem="wTx-mS-MXy" secondAttribute="trailing" id="oc0-xN-hkB"/>
+                                <constraint firstAttribute="trailing" secondItem="wTx-mS-MXy" secondAttribute="trailing" constant="4" id="oc0-xN-hkB"/>
                                 <constraint firstAttribute="centerX" secondItem="1eh-n7-GDx" secondAttribute="centerX" id="tAo-fQ-fEU"/>
                                 <constraint firstItem="5It-ay-SXb" firstAttribute="top" secondItem="6hu-Et-oq7" secondAttribute="top" constant="11" id="y6z-36-dcj"/>
                             </constraints>
@@ -552,26 +532,19 @@
                 <constraint firstItem="tYU-yx-pAJ" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="x2k-ya-YPW"/>
             </constraints>
         </customView>
-        <arrayController objectClassName="PodItem" id="ywO-R5-7V8" userLabel="Installed">
+        <arrayController objectClassName="PodItem" editable="NO" id="IcY-LW-nC8" userLabel="Available">
             <declaredKeys>
                 <string>name</string>
+                <string>version</string>
+                <string>summary</string>
             </declaredKeys>
             <connections>
-                <binding destination="-2" name="contentArray" keyPath="installedPods" id="LKy-Dh-LCz"/>
-            </connections>
-        </arrayController>
-        <arrayController objectClassName="PodItem" id="pXf-Ea-Zmh" userLabel="Available">
-            <declaredKeys>
-                <string>name</string>
-            </declaredKeys>
-            <connections>
-                <binding destination="-2" name="contentArray" keyPath="availablePods" id="fSf-wm-vbA"/>
+                <binding destination="-2" name="contentArray" keyPath="self.availablePods" id="oL8-Ti-VXe"/>
             </connections>
         </arrayController>
     </objects>
     <resources>
         <image name="edit" width="25.600000381469727" height="25.600000381469727"/>
-        <image name="info" width="16" height="16"/>
         <image name="minus" width="16" height="16"/>
         <image name="plus" width="16" height="16"/>
     </resources>

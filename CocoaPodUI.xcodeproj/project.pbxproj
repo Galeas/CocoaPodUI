@@ -11,8 +11,10 @@
 		6D25F22D18C27BC000298455 /* NSWindow+Sizing.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D25F22C18C27BC000298455 /* NSWindow+Sizing.m */; };
 		6D679C4918C2694F00B177EB /* PodsManagementViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D679C4718C2694F00B177EB /* PodsManagementViewController.m */; };
 		6D679C4A18C2694F00B177EB /* PodsManagementViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */; };
+		6D74161418ED42F6002F111A /* NSString+Extra.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D74161318ED42F6002F111A /* NSString+Extra.m */; };
 		6D8B7C9A18C22B0E0040A5C7 /* NSView+Frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D8B7C9918C22B0E0040A5C7 /* NSView+Frame.m */; };
 		6DCB578B18C21FAE00AA37E2 /* CreatePodController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DCB578918C21FAE00AA37E2 /* CreatePodController.m */; };
+		6DE28F3918EAD8C70025F471 /* YAML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DE28F3018EAD8B70025F471 /* YAML.framework */; };
 		D612005F18D9FE28006FC060 /* PodEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = D612005D18D9FE28006FC060 /* PodEditController.m */; };
 		D612006018D9FE28006FC060 /* PodEditController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D612005E18D9FE28006FC060 /* PodEditController.xib */; };
 		D617AB4018BF57E300BAA982 /* MainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D617AB3E18BF57E300BAA982 /* MainWindowController.m */; };
@@ -31,17 +33,58 @@
 		D6FA49D518BF46E50082B98D /* CocoaPodUI.m in Sources */ = {isa = PBXBuildFile; fileRef = D6FA49D418BF46E50082B98D /* CocoaPodUI.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		6DE28F2F18EAD8B70025F471 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = YAML;
+		};
+		6DE28F3118EAD8B70025F471 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D319EEA613E5EE2A000EB46D;
+			remoteInfo = YAMLUnitTests;
+		};
+		6DE28F3318EAD8B70025F471 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EB6C420E124D99BE00886AD1;
+			remoteInfo = test;
+		};
+		6DE28F3518EAD8B70025F471 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EBE745C1124F8C0D00618049;
+			remoteInfo = "test (spec12examples)";
+		};
+		6DE28F3718EAD8B70025F471 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EB2B5928124E2100001FFEEB;
+			remoteInfo = events;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		6D25F22B18C27BC000298455 /* NSWindow+Sizing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSWindow+Sizing.h"; path = "Categories/NSWindow+Sizing.h"; sourceTree = "<group>"; };
 		6D25F22C18C27BC000298455 /* NSWindow+Sizing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSWindow+Sizing.m"; path = "Categories/NSWindow+Sizing.m"; sourceTree = "<group>"; };
 		6D679C4618C2694F00B177EB /* PodsManagementViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodsManagementViewController.h; path = Controllers/PodsManagementViewController.h; sourceTree = "<group>"; };
 		6D679C4718C2694F00B177EB /* PodsManagementViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodsManagementViewController.m; path = Controllers/PodsManagementViewController.m; sourceTree = "<group>"; };
 		6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodsManagementViewController.xib; path = Controllers/PodsManagementViewController.xib; sourceTree = "<group>"; };
+		6D74161218ED42F6002F111A /* NSString+Extra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Extra.h"; path = "Categories/NSString+Extra.h"; sourceTree = "<group>"; };
+		6D74161318ED42F6002F111A /* NSString+Extra.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Extra.m"; path = "Categories/NSString+Extra.m"; sourceTree = "<group>"; };
 		6D8B7C9818C22B0E0040A5C7 /* NSView+Frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSView+Frame.h"; path = "Categories/NSView+Frame.h"; sourceTree = "<group>"; };
 		6D8B7C9918C22B0E0040A5C7 /* NSView+Frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSView+Frame.m"; path = "Categories/NSView+Frame.m"; sourceTree = "<group>"; };
 		6DCB578818C21FAE00AA37E2 /* CreatePodController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CreatePodController.h; path = Controllers/CreatePodController.h; sourceTree = "<group>"; };
 		6DCB578918C21FAE00AA37E2 /* CreatePodController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CreatePodController.m; path = Controllers/CreatePodController.m; sourceTree = "<group>"; };
 		6DCB578A18C21FAE00AA37E2 /* CreatePodController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CreatePodController.xib; path = Controllers/CreatePodController.xib; sourceTree = "<group>"; };
+		6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YAML.xcodeproj; path = "YAML.framework-master/YAML.xcodeproj"; sourceTree = "<group>"; };
 		D612005C18D9FE28006FC060 /* PodEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodEditController.h; path = Controllers/PodEditController.h; sourceTree = "<group>"; };
 		D612005D18D9FE28006FC060 /* PodEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodEditController.m; path = Controllers/PodEditController.m; sourceTree = "<group>"; };
 		D612005E18D9FE28006FC060 /* PodEditController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodEditController.xib; path = Controllers/PodEditController.xib; sourceTree = "<group>"; };
@@ -81,6 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DE28F3918EAD8C70025F471 /* YAML.framework in Frameworks */,
 				D67E063B18C60E1600200343 /* QuartzCore.framework in Frameworks */,
 				D6FA49C218BF43750082B98D /* Cocoa.framework in Frameworks */,
 			);
@@ -89,6 +133,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6DE28F2818EAD8B70025F471 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6DE28F3018EAD8B70025F471 /* YAML.framework */,
+				6DE28F3218EAD8B70025F471 /* YAMLUnitTests.octest */,
+				6DE28F3418EAD8B70025F471 /* test */,
+				6DE28F3618EAD8B70025F471 /* test */,
+				6DE28F3818EAD8B70025F471 /* events */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		D617AB4218BF57F200BAA982 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +175,8 @@
 				6D8B7C9918C22B0E0040A5C7 /* NSView+Frame.m */,
 				6D25F22B18C27BC000298455 /* NSWindow+Sizing.h */,
 				6D25F22C18C27BC000298455 /* NSWindow+Sizing.m */,
+				6D74161218ED42F6002F111A /* NSString+Extra.h */,
+				6D74161318ED42F6002F111A /* NSString+Extra.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -167,6 +225,7 @@
 		D6FA49B518BF43750082B98D = {
 			isa = PBXGroup;
 			children = (
+				6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */,
 				D6FA49C718BF43750082B98D /* CocoaPodUI */,
 				D6FA49C018BF43750082B98D /* Frameworks */,
 				D6FA49BF18BF43750082B98D /* Products */,
@@ -265,12 +324,56 @@
 			mainGroup = D6FA49B518BF43750082B98D;
 			productRefGroup = D6FA49BF18BF43750082B98D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 6DE28F2818EAD8B70025F471 /* Products */;
+					ProjectRef = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D6FA49BD18BF43750082B98D /* CocoaPodUI */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		6DE28F3018EAD8B70025F471 /* YAML.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = YAML.framework;
+			remoteRef = 6DE28F2F18EAD8B70025F471 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6DE28F3218EAD8B70025F471 /* YAMLUnitTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = YAMLUnitTests.octest;
+			remoteRef = 6DE28F3118EAD8B70025F471 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6DE28F3418EAD8B70025F471 /* test */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = test;
+			remoteRef = 6DE28F3318EAD8B70025F471 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6DE28F3618EAD8B70025F471 /* test */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = test;
+			remoteRef = 6DE28F3518EAD8B70025F471 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6DE28F3818EAD8B70025F471 /* events */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = events;
+			remoteRef = 6DE28F3718EAD8B70025F471 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D6FA49BC18BF43750082B98D /* Resources */ = {
@@ -306,6 +409,7 @@
 				D6FA49D518BF46E50082B98D /* CocoaPodUI.m in Sources */,
 				6D8B7C9A18C22B0E0040A5C7 /* NSView+Frame.m in Sources */,
 				D67E063918C60DFC00200343 /* JMOverlayView.m in Sources */,
+				6D74161418ED42F6002F111A /* NSString+Extra.m in Sources */,
 				6DCB578B18C21FAE00AA37E2 /* CreatePodController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +504,11 @@
 				DSTROOT = "${HOME}";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CocoaPodUI/CocoaPodUI-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(PROJECT_DIR)/YAML.framework-master/**",
+				);
 				INFOPLIST_FILE = "CocoaPodUI/CocoaPodUI-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
@@ -416,6 +525,11 @@
 				DSTROOT = "${HOME}";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CocoaPodUI/CocoaPodUI-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(PROJECT_DIR)/YAML.framework-master/**",
+				);
 				INFOPLIST_FILE = "CocoaPodUI/CocoaPodUI-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;

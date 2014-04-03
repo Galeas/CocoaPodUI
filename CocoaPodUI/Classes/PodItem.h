@@ -27,19 +27,16 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString *const kAddPodNotificationName;
+extern NSString *const kDeletePodNotificationName;
+extern NSString *const kEditPodNotificationName;
+
 @interface PodItem : NSObject <NSCopying>
-- (instancetype)initWithString:(NSString*)string;
-- (instancetype)initWithName:(NSString*)name;
-- (void)loadDescription;
-- (void)loadDescriptionWithCompletion:(void(^)(void))completion;
-- (BOOL)isEqualToPod:(PodItem*)pod;
-- (NSString*)installStringWithVersion:(NSString*)version;
-@property (copy) NSString *name;
-@property (copy) NSString *version;
-@property (copy) NSString *podDescription;
-@property (copy) NSString *installString;
-@property (readonly) NSArray *availableVersions;
-@property (assign, nonatomic) BOOL iOSSupport;
-@property (assign, nonatomic) BOOL OSXSupport;
-@property (assign, nonatomic) BOOL inProgress;
+- (void)setPodspecData:(NSData*)data;
+@property (strong, nonatomic) NSString *repoPath;
+@property (strong, nonatomic) NSString *summary;
+@property (strong, nonatomic) NSString *version;
+@property (strong, nonatomic) NSString *versionModifier;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSArray *versions;
 @end

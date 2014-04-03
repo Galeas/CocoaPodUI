@@ -26,152 +26,64 @@
 //THE SOFTWARE.
 
 #import "PodItem.h"
+#import "NSString+Extra.h"
 
-@interface NSString (Extra)
-- (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second;
-@end
-@implementation NSString (Extra)
-
-- (NSString *)stringBetweenString:(NSString *)first andString:(NSString *)second
-{
-    NSScanner* scanner = [NSScanner scannerWithString:self];
-    [scanner setCharactersToBeSkipped:nil];
-    [scanner scanUpToString:first intoString:NULL];
-    if ([scanner scanString:first intoString:NULL]) {
-        NSString* result = nil;
-        if ([scanner scanUpToString:second intoString:&result]) {
-            return result;
-        }
-    }
-    return nil;
-}
-@end
+NSString *const kAddPodNotificationName = @"CocoaPodUI:AddPodAction";
+NSString *const kDeletePodNotificationName = @"CocoaPodUI:DeletePodAction";
+NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
 
 @interface PodItem()
-@property (copy) void(^_completion)(void);
+@property (copy) void(^_completion)(PodItem*);
+@property (readonly) NSArray *possibleVersionModifiers;
 @end
 
 @implementation PodItem
 
-- (instancetype)initWithString:(NSString *)string
+- (void)setPodspecData:(NSData *)data
 {
-    self = [super init];
-    if (self) {
-        [self setInstallString:string];
-        NSCharacterSet *quoteSet = [NSCharacterSet characterSetWithCharactersInString:@"'\""];
-        NSScanner *scanner = [[NSScanner alloc] initWithString:string];
-        [scanner setCharactersToBeSkipped:[NSCharacterSet characterSetWithCharactersInString:@"~>"]];
-        while ([scanner isAtEnd] == NO) {
-            NSString *name = nil;
-            [scanner scanUpToCharactersFromSet:quoteSet intoString:NULL];
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-            [scanner scanUpToCharactersFromSet:quoteSet intoString:&name];
-            [self setName:name];
-            
-            NSString *version = nil;
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-            [scanner scanUpToCharactersFromSet:quoteSet intoString:NULL];
-            if ([scanner isAtEnd]) break;
-            [scanner setScanLocation:[scanner scanLocation] + 1];
-            [scanner scanUpToCharactersFromSet:quoteSet intoString:&version];
-            [self setVersion:[NSString stringWithFormat:@"%@",[version stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]]];
-            break;
-        }
-    }
-    return self;
-}
-
-- (instancetype)initWithName:(NSString *)name
-{
-    self = [super init];
-    if (self) {
-        NSString *possibleName = [name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if ([possibleName rangeOfString:@" "].location != NSNotFound) {
-            return nil;
-        }
-        else if ([possibleName rangeOfCharacterFromSet:[NSCharacterSet alphanumericCharacterSet]].location == NSNotFound) {
-            return nil;
-        }
-        [self setName:possibleName];
-    }
-//    [self loadDescription];
-    return self;
-}
-
-- (void)loadDescription
-{
-    [self loadDescriptionWithCompletion:nil];
-}
-
-- (void)loadDescriptionWithCompletion:(void (^)(void))completion
-{
-    [self set_completion:completion];
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSTask *podInfoTask = [[NSTask alloc] init];
-        NSArray *args = @[@"search", weakSelf.name, @"--stats"];
-        [podInfoTask setLaunchPath:@"/usr/bin/pod"];
-        [podInfoTask setArguments:args];
-        NSPipe *pipeOut = [NSPipe pipe];
-        [podInfoTask setStandardOutput:pipeOut];
-        NSFileHandle *output = [pipeOut fileHandleForReading];
-        NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
-        environment[@"LC_ALL"]=@"en_US.UTF-8";
-        [podInfoTask setEnvironment:environment];
-        [podInfoTask launch];
-        NSData *data = [output readDataToEndOfFile];
+    NSParameterAssert(data);
+    
+    NSString *podspecString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSCharacterSet *restrictedSet = [NSCharacterSet characterSetWithCharactersInString:@" \t'\""];
+    CGFloat lenght = [podspecString length];
+    
+    NSRange range;
+    @try {
+        range = [podspecString rangeOfString:@".name"];
+        NSString *nameString = [podspecString stringBetweenString:@"=" andString:@"\n" inRange:NSMakeRange(range.location, lenght - range.location)];
+        _name = [nameString stringByTrimmingCharactersInSet:restrictedSet];
         
-        NSString *list = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSUInteger startIndex = [list rangeOfString:[NSString stringWithFormat:@"-> %@ ", weakSelf.name] options:NSLiteralSearch].location;
-        if (startIndex != NSNotFound) {
-            NSString *info = [list substringFromIndex:startIndex];
-            NSArray *strings = [info componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-            NSString *first = [strings objectAtIndex:0];
-            NSUInteger versionIndex = [first rangeOfString:@" " options:NSBackwardsSearch].location;
-            NSUInteger lastIndex = NSNotFound;
-            if (versionIndex != NSNotFound) {
-                lastIndex = [first rangeOfString:@")" options:NSBackwardsSearch].location;
-            }
-            NSString *version = versionIndex != NSNotFound ? [first substringWithRange:NSMakeRange(versionIndex + 2, lastIndex - versionIndex - 2)] : nil;
-//            NSString *version = versionIndex != NSNotFound ? [first substringWithRange:NSMakeRange(versionIndex + 1, lastIndex - versionIndex/* + 1*/)] : nil;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf willChangeValueForKey:@"podDescription"];
-                [weakSelf willChangeValueForKey:@"installString"];
-                [weakSelf willChangeValueForKey:@"version"];
-                [weakSelf willChangeValueForKey:@"availableVersions"];
-                [weakSelf setVersion:version];
-                [weakSelf setPodDescription:[[strings objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-                [weakSelf setInstallString:[[strings objectAtIndex:2] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-                NSString *versionsString = [info stringBetweenString:@"- Versions: " andString:@"[master repo]"];
-                if ([versionsString length] > 0) {
-                    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:@"([0-9].)*?(\\S+[0-9])" options:NSRegularExpressionCaseInsensitive error:NULL];
-                    NSMutableArray *arr = [NSMutableArray array];
-                    [regex enumerateMatchesInString:versionsString options:0 range:NSMakeRange(0, versionsString.length) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-                        NSString *vStrng = [versionsString substringWithRange:result.range];
-                        [arr addObject:vStrng];
-                    }];
-                    __strong typeof(weakSelf) strongSelf = weakSelf;
-                    NSAssert(strongSelf, @"%s\tInstance already released!", __PRETTY_FUNCTION__);
-                    if (strongSelf != nil) {
-                        strongSelf->_availableVersions = [[NSArray arrayWithArray:arr] copy];
-                    }
-                }
-                [weakSelf didChangeValueForKey:@"version"];
-                [weakSelf didChangeValueForKey:@"podDescription"];
-                [weakSelf didChangeValueForKey:@"installString"];
-                [weakSelf didChangeValueForKey:@"availableVersions"];
-                
-                if (weakSelf._completion != nil) {
-                    weakSelf._completion();
-                }
-            });
-        }
-    });
+        range = [podspecString rangeOfString:@".version"];
+        NSString *versionString = [podspecString stringBetweenString:@"=" andString:@"\n" inRange:NSMakeRange(range.location, lenght - range.location)];
+        _version = [versionString stringByTrimmingCharactersInSet:restrictedSet];
+        
+        range = [podspecString rangeOfString:@".summary"];
+        NSString *summaryString = [podspecString stringBetweenString:@"=" andString:@"\n" inRange:NSMakeRange(range.location, lenght - range.location)];
+        _summary = [summaryString stringByTrimmingCharactersInSet:restrictedSet];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"%@", self.repoPath);
+    }
 }
 
-- (NSString *)installStringWithVersion:(NSString *)version
+- (void)addAction
 {
-    return [NSString stringWithFormat:@"pod '%@', '~> %@'", self.name, version];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kAddPodNotificationName object:self];
+}
+
+- (void)editAction
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kEditPodNotificationName object:self];
+}
+
+- (void)deleteAction
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kDeletePodNotificationName object:self];
+}
+
+- (NSArray *)possibleVersionModifiers
+{
+    return @[@"Version logic", @"~>", @">", @">=", @"<", @"<="];
 }
 
 #pragma mark
@@ -181,13 +93,12 @@
 {
     PodItem *copyItem = [[PodItem alloc] init];
     
-    [copyItem setName:[self.name copyWithZone:zone]];
-    [copyItem setInstallString:[self.installString copyWithZone:zone]];
-    [copyItem setPodDescription:[self.podDescription copyWithZone:zone]];
-    [copyItem setVersion:[self.version copyWithZone:zone]];
-    [copyItem setIOSSupport:self.iOSSupport];
-    [copyItem setOSXSupport:self.OSXSupport];
-    [copyItem setInProgress:self.inProgress];
+    copyItem->_name = [self.name copyWithZone:zone];
+    copyItem->_version = [self.version copyWithZone:zone];
+    copyItem->_summary = [self.summary copyWithZone:zone];
+    copyItem->_versionModifier = [self.versionModifier copyWithZone:zone];
+    copyItem->_versions = [self.versions copyWithZone:zone];
+    copyItem->_repoPath = [self.repoPath copyWithZone:zone];
     
     return copyItem;
 }
@@ -196,8 +107,6 @@
 {
     BOOL equalNames = [self.name isEqualToString:pod.name];
     BOOL equalVersion = [self.version isEqualToString:pod.version];
-    BOOL equalPlatform = (self.iOSSupport == pod.iOSSupport) && (self.OSXSupport == pod.OSXSupport);
-    return equalNames && equalVersion && equalPlatform;
+    return equalNames && equalVersion;
 }
-
 @end
