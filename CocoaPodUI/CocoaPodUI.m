@@ -73,25 +73,28 @@
 
 - (void)findGemLocation
 {
-    NSTask *gemTask = [[NSTask alloc] init];
-    [gemTask setLaunchPath:@"/usr/bin/gem"];
-    [gemTask setArguments:@[@"environment"]];
-    NSPipe *pipeOut = [NSPipe pipe];
-    [gemTask setStandardOutput:pipeOut];
-    NSFileHandle *output = [pipeOut fileHandleForReading];
-    NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
-    environment[@"LC_ALL"]=@"en_US.UTF-8";
-    [gemTask setEnvironment:environment];
-    [gemTask launch];
-    NSData *data = [output readDataToEndOfFile];
-    NSDictionary *dict = [YAMLSerialization objectWithYAMLData:data options:kYAMLReadOptionStringScalars error:NULL];
-    NSArray *values = [dict valueForKey:@"RubyGems Environment"];
-    NSArray *execDirArr = [values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.%@ != NULL", @"EXECUTABLE DIRECTORY"]];
-    if ([execDirArr count] == 1) {
-        NSString *path = [[[execDirArr firstObject] allValues] firstObject];
-        kPodGemPath = [path stringByAppendingPathComponent:@"pod"];
+    NSString *location = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+    if ([location length] == 0) {
+        NSTask *gemTask = [[NSTask alloc] init];
+        [gemTask setLaunchPath:@"/usr/bin/gem"];
+        [gemTask setArguments:@[@"environment"]];
+        NSPipe *pipeOut = [NSPipe pipe];
+        [gemTask setStandardOutput:pipeOut];
+        NSFileHandle *output = [pipeOut fileHandleForReading];
+        NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+        environment[@"LC_ALL"]=@"en_US.UTF-8";
+        [gemTask setEnvironment:environment];
+        [gemTask launch];
+        NSData *data = [output readDataToEndOfFile];
+        NSDictionary *dict = [YAMLSerialization objectWithYAMLData:data options:kYAMLReadOptionStringScalars error:NULL];
+        NSArray *values = [dict valueForKey:@"RubyGems Environment"];
+        NSArray *execDirArr = [values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.%@ != NULL", @"EXECUTABLE DIRECTORY"]];
+        if ([execDirArr count] == 1) {
+            NSString *path = [[[execDirArr firstObject] allValues] firstObject];
+            [[NSUserDefaults standardUserDefaults] setValue:[path stringByAppendingPathComponent:@"pod"] forKey:kPodGemPathKey];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
     }
-    NSLog(@"%@", kPodGemPath);
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem

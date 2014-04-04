@@ -37,9 +37,9 @@
 
 #import <YAMLSerialization.h>
 
-NSString *const kUserDidDeleteAllPods = @"CococaPodUI:UserDidDeleteAllPods";
-
 static NSString *const kReposDidRead = @"CococaPodUI:ReposDidRead";
+
+#define kAccessoryViewFieldTag 666
 
 typedef NS_ENUM(NSUInteger, ProjectFileType) {
     XCodeProject,
@@ -48,7 +48,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 @interface PodsManagementViewController () <NSTableViewDelegate, NSTableViewDataSource, JMModalOverlayDelegate, NSFileManagerDelegate, PodEdtitionDelegate>
 {
-    @private
+@private
     NSArray *_sortedAvailableKeys;
     id _reposReadStateObserver;
 }
@@ -70,11 +70,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 @property (weak) IBOutlet NSTableView *installedTable;
 @property (weak) IBOutlet NSTableView *availableTable;
 
-//- (IBAction)addPod:(id)sender;
-//- (IBAction)deletePod:(id)sender;
 - (IBAction)saveAndInstallAction:(id)sender;
 - (IBAction)closeAction:(id)sender;
-//- (IBAction)editPod:(id)sender;
 - (IBAction)deleteAllPods:(id)sender;
 @end
 
@@ -137,7 +134,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     
     NSTask *podfileTask = [[NSTask alloc] init];
     NSArray *args = @[@"ipc", @"podfile", path, @"--no-color"];
-    [podfileTask setLaunchPath:kPodGemPath];
+    NSString *launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+    [podfileTask setLaunchPath:launchPath];
     [podfileTask setArguments:args];
     NSPipe *pipeOut = [NSPipe pipe];
     [podfileTask setStandardOutput:pipeOut];
@@ -145,14 +143,37 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
     environment[@"LC_ALL"]=@"en_US.UTF-8";
     [podfileTask setEnvironment:environment];
+    
     @try {
         [podfileTask launch];
     }
     @catch (NSException *exception) {
         if ([[exception reason] isEqualToString:@"launch path not accessible"]) {
-            NSAlert *alert = [NSAlert alertWithMessageText:@"Cocoapods gem not found" defaultButton:@"Close" alternateButton:@"" otherButton:@"" informativeTextWithFormat:@"It seems like Cocoapods gem isn't installed on your system. Check \"pod\" gem at %@ folder or perform installation by running Terminal command:\n\n\t$ sudo gem install cocoapods", [kPodGemPath stringByDeletingLastPathComponent]];
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert setMessageText:@"Cocoapods gem not found"];
+            [alert addButtonWithTitle:@"Save"];
+            [alert addButtonWithTitle:@"Cancel"];
+            
+            NSTextField *field = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 4, 200, 20)];
+            [[field cell] setPlaceholderString:@"\"Pod\" gem path"];
+            [field setTag:kAccessoryViewFieldTag];
+            [[field cell] setLineBreakMode:NSLineBreakByTruncatingHead];
+            
+            NSButton *btn = [[NSButton alloc] initWithFrame:NSMakeRect(208, 0, 135, 24)];
+            [btn setTitle:@"Specify gem location"];
+            [btn setButtonType:NSMomentaryPushButton];
+            [btn setBezelStyle:NSRoundedBezelStyle];
+            [btn setTarget:self];
+            [btn setAction:@selector(specifyPodGemLocation:)];
+            
+            NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 345, 30)];
+            [accessoryView addSubview:field];
+            [accessoryView addSubview:btn];
+            
+            [alert setAccessoryView:accessoryView];
+            [alert setInformativeText:[NSString stringWithFormat:@"CocoaPodUI can't find \"pod\" gem at default %@ folder. You can specify it's location manually", [launchPath stringByDeletingLastPathComponent]]];
             [alert setAlertStyle:NSCriticalAlertStyle];
-            [alert beginSheetModalForWindow:[[self view] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+            [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
             return;
         }
     }
@@ -215,9 +236,37 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     }
 }
 
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+{
+    if (returnCode == 1000) {
+        NSTextField *field = [[alert accessoryView] viewWithTag:kAccessoryViewFieldTag];
+        NSString *path = [field stringValue];
+        if ([path length] > 0) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+                [[NSUserDefaults standardUserDefaults] setValue:[path copy] forKey:kPodGemPathKey];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                [self loadPodsWithPath:self.path];
+            }
+        }
+    }
+}
+
+- (void)specifyPodGemLocation:(id)sender
+{
+    NSOpenPanel *open = [NSOpenPanel openPanel];
+    [open setAllowsMultipleSelection:NO];
+    [open beginWithCompletionHandler:^(NSInteger result) {
+        if (result == NSOKButton) {
+            NSString *path = [[open URL] path];
+            NSTextField *field = [[sender superview] viewWithTag:kAccessoryViewFieldTag];
+            [field setStringValue:path];
+        }
+    }];
+}
+
 - (void)completeInstalledPods
 {
-    NSString *podfileLockPath = [[self.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Podfile.lock"];    
+    NSString *podfileLockPath = [[self.path stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Podfile.lock"];
     NSError *error = nil;
     
     __weak typeof(self) weakSelf = self;
@@ -323,11 +372,11 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     __weak typeof(self) weakSelf = self;
     [self installTask:^(BOOL success, NSError *error) {
         
-//        NSLog(@"INSTALL COMPLETE. Succeded = %hhd, Changed = %d", success, !success);
+        //        NSLog(@"INSTALL COMPLETE. Succeded = %hhd, Changed = %d", success, !success);
         [weakSelf setInstallationSucceded:success];
         [weakSelf setInstallationError:error];
         
-//        NSLog(@"NOW CLOSE OVERLAY");
+        //        NSLog(@"NOW CLOSE OVERLAY");
         [weakSelf.overlayController animateProgress:NO];
         [weakSelf.overlay performSelectorOnMainThread:@selector(close) withObject:nil waitUntilDone:YES];
         [weakSelf.overlayController performSelectorOnMainThread:@selector(setText:) withObject:@"" waitUntilDone:NO];
@@ -336,14 +385,14 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (void)modalOverlayDidClose:(NSNotification *)notification
 {
-//    NSLog(@"NeedReopen Flag = %hhd && InstallSucceded Flag = %d", self.needReopenWorkspace, self.installationSucceded);
+    //    NSLog(@"NeedReopen Flag = %hhd && InstallSucceded Flag = %d", self.needReopenWorkspace, self.installationSucceded);
     [self setChanged:!self.installationSucceded];
     if (self.needReopenWorkspace && self.installationSucceded) {
-//        NSLog(@"NEED REOPEN");
+        //        NSLog(@"NEED REOPEN");
         [self reopenProject:XCodeWorkspace];
     }
     else if (!self.installationSucceded) {
-//        NSLog(@"NEED REOPEN, BUT INSTALL UNSUCCESFULL");
+        //        NSLog(@"NEED REOPEN, BUT INSTALL UNSUCCESFULL");
         NSAlert *alert = [[NSAlert alloc] init];
         NSString *text = [[_installationError userInfo] valueForKey:@"reason"];
         [alert setAlertStyle:NSCriticalAlertStyle];
@@ -393,7 +442,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 {
     NSTask *installTask = [[NSTask alloc] init];
     NSArray *args = @[@"install", @"--no-color"];
-    [installTask setLaunchPath:kPodGemPath];
+    NSString *launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+    [installTask setLaunchPath:launchPath];
     [installTask setCurrentDirectoryPath:[self.path stringByDeletingLastPathComponent]];
     [installTask setArguments:args];
     NSPipe *pipeOut = [NSPipe pipe];
@@ -485,7 +535,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
             NSString *extension = type == XCodeProject ? @"xcodeproj" : @"xcworkspace";
             NSString *workspaceFilePath = [projectFolderPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", projectName, extension]];
             BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:workspaceFilePath];
-            NSLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
+            //            NSLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
             if (fileExists) {
                 NSTask *openTask = [[NSTask alloc] init];
                 NSArray *args = @[workspaceFilePath];
@@ -510,7 +560,6 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     PodItem *item = [[note object] copy];
     if (item) {
         [self.installedPods addObject:item];
-        NSLog(@"%@", item.versions);
         [self setChanged:YES];
         [self.installedTable insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:[self.installedPods indexOfObject:item]] withAnimation:NSTableViewAnimationSlideRight];
     }
@@ -548,10 +597,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     NSString *podfileString = [self podfileString];
     NSError *error = nil;
     
-    NSLog(@"%@", podfileString);
     BOOL saveSuccess = [podfileString writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:&error];
-    NSLog(@"%@", self.path);
-
+    
     if (saveSuccess && !error) {
         if (![self.overlay isShown]) {
             [self.overlayController animateProgress:YES];
@@ -573,7 +620,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         [self.podfileText deleteCharactersInRange:NSMakeRange(headerLastIndex + 2, self.podfileText.length - headerLastIndex - 2)];
     }
     
-// Clean up pods
+    // Clean up pods
     NSError *error = nil;
     NSString *projectFolderPath = [self.path stringByDeletingLastPathComponent];
     [[NSFileManager defaultManager] removeItemAtPath:self.path error:&error];
@@ -585,7 +632,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     NSString *workspaceFilePath = [projectFolderPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.xcworkspace", projectName]];
     [[NSFileManager defaultManager] removeItemAtPath:workspaceFilePath error:&error];
     
-// Clean up project
+    // Clean up project
     NSString *projectSettingsFilePath = [projectFolderPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.xcodeproj/project.pbxproj", projectName]];
     NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:projectSettingsFilePath];
     NSMutableDictionary *objects = [settings objectForKey:@"objects"];
@@ -628,8 +675,6 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     if (self.needReopenWorkspace) {
         [self reopenProject:XCodeProject];
     }
-    
-//    [[NSNotificationCenter defaultCenter] postNotificationName:kUserDidDeleteAllPods object:nil];
 }
 
 #pragma mark
