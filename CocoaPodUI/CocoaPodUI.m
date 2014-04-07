@@ -74,25 +74,21 @@
 - (void)findGemLocation
 {
     NSString *location = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+//    NSLog(@"Saved Location: %@", location);
     if ([location length] == 0) {
-        NSTask *gemTask = [[NSTask alloc] init];
-        [gemTask setLaunchPath:@"/usr/bin/gem"];
-        [gemTask setArguments:@[@"environment"]];
+        NSTask *sTask = [[NSTask alloc] init];
+        [sTask setArguments:@[@"pod"]];
+        [sTask setLaunchPath:@"/usr/bin/which"];
         NSPipe *pipeOut = [NSPipe pipe];
-        [gemTask setStandardOutput:pipeOut];
+        [sTask setStandardOutput:pipeOut];
         NSFileHandle *output = [pipeOut fileHandleForReading];
-        NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
-        environment[@"LC_ALL"]=@"en_US.UTF-8";
-        [gemTask setEnvironment:environment];
-        [gemTask launch];
+        [sTask launch];
         NSData *data = [output readDataToEndOfFile];
-        NSDictionary *dict = [YAMLSerialization objectWithYAMLData:data options:kYAMLReadOptionStringScalars error:NULL];
-        NSArray *values = [dict valueForKey:@"RubyGems Environment"];
-        NSArray *execDirArr = [values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.%@ != NULL", @"EXECUTABLE DIRECTORY"]];
-        if ([execDirArr count] == 1) {
-            NSString *path = [[[execDirArr firstObject] allValues] firstObject];
-            [[NSUserDefaults standardUserDefaults] setValue:[path stringByAppendingPathComponent:@"pod"] forKey:kPodGemPathKey];
+        NSString *path = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+            [[NSUserDefaults standardUserDefaults] setValue:path forKeyPath:kPodGemPathKey];
             [[NSUserDefaults standardUserDefaults] synchronize];
+//            NSLog(@"Found location: %@", path);
         }
     }
 }
