@@ -187,7 +187,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         NSError *error = nil;
         NSDictionary *obj = [YAMLSerialization objectWithYAMLData:yamlData options:kYAMLReadOptionStringScalars error:&error];
         if (obj && !error) {
-            [self setPodfileText:[[NSMutableString alloc] initWithData:yamlData encoding:NSUTF8StringEncoding]];
+            [self setPodfileText:[[NSMutableString alloc] initWithContentsOfFile:self.path encoding:NSUTF8StringEncoding error:&error]];
             NSArray *definitions = [obj valueForKey:@"target_definitions"];
             if ([definitions count] == 1) {
                 NSDictionary *info = [definitions objectAtIndex:0];
@@ -505,17 +505,34 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (NSString*)podfileString
 {
-    NSMutableString *result = [NSMutableString string];
-    [result appendFormat:@"platform :%@, '%@'\n", [[self.platformName lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""], self.platformVersion];
-    [self.installedPods enumerateObjectsUsingBlock:^(PodItem *item, NSUInteger idx, BOOL *stop) {
-        if ([item.versionModifier length] == 0 || [item.versionModifier isEqualToString:@"Version logic"]) {
-            [result appendFormat:@"\npod '%@', '%@'", item.name, item.version];
-        }
-        else {
-            [result appendFormat:@"\npod '%@', '%@ %@'", item.name, item.versionModifier, item.version];
-        }
-    }];
-    return [NSString stringWithString:result];
+    NSMutableString *podfileText = [[self.podfileText stringByreplacingOccurrencesOfCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"`\""] withString:@"'"] mutableCopy];
+    NSString *firstLine = [[podfileText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] firstObject];
+    NSRange range = [podfileText rangeOfString:firstLine];
+    if (range.location != NSNotFound) {
+        NSString *header = [NSString stringWithFormat:@"platform :%@, '%@'\n", [[self.platformName lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""], self.platformVersion];
+        [podfileText replaceCharactersInRange:range withString:header];
+    }
+    
+    NSUInteger startPodsSection = [self.podfileText rangeOfString:@"pod "].location;
+    if (startPodsSection != NSNotFound) {
+        __block NSUInteger length = 0;
+        [podfileText enumerateSubstringsInRange:NSMakeRange(startPodsSection, [podfileText length] - startPodsSection) options:NSStringEnumerationByLines usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+            if ([substring hasPrefix:@"pod"]) {
+                length += substringRange.length;
+            }
+        }];
+        NSMutableString *inTable = [NSMutableString string];
+        [self.installedPods enumerateObjectsUsingBlock:^(PodItem *item, NSUInteger idx, BOOL *stop) {
+            if ([item.versionModifier length] == 0 || [item.versionModifier isEqualToString:@"Version logic"]) {
+                [inTable appendFormat:@"%@pod '%@', '%@'", idx == 0 ? @"" : @"\n", item.name, item.version];
+            }
+            else {
+                [inTable appendFormat:@"%@pod '%@', '%@ %@'", idx == 0 ? @"" : @"\n", item.name, item.versionModifier, item.version];
+            }
+        }];
+        [podfileText replaceCharactersInRange:NSMakeRange(startPodsSection, ++length) withString:inTable];
+    }
+    return [NSString stringWithString:podfileText];
 }
 
 - (void)setPlatformName:(NSString *)platformName
@@ -644,11 +661,12 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 - (IBAction)saveAndInstallAction:(id)sender
 {
     NSString *podfileString = [self podfileString];
+//    NSLog(@"%@", podfileString);
     NSError *error = nil;
-    
+    [[NSFileManager defaultManager] removeItemAtPath:self.path error:&error];
     BOOL saveSuccess = [podfileString writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:&error];
-    
     if (saveSuccess && !error) {
+        [self setPodfileText:[podfileString mutableCopy]];
         if (![self.overlay isShown]) {
             [self.overlayController animateProgress:YES];
             [self.overlay showInWindow:[[self view] window]];

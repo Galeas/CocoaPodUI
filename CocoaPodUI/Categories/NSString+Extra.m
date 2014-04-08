@@ -29,4 +29,14 @@
     NSString *substring = [self substringWithRange:range];
     return [substring stringBetweenString:first andString:second];
 }
+
+- (NSString *)stringByreplacingOccurrencesOfCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replacement
+{
+    NSRange range;
+    NSString *s = [self copy];
+    while ((range = [s rangeOfCharacterFromSet:set]).location != NSNotFound) {
+        s = [s stringByReplacingCharactersInRange:range withString:replacement];
+    }
+    return s;
+}
 @end

@@ -11,4 +11,5 @@
 @interface NSString (Extra)
 - (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second;
 - (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second inRange:(NSRange)range;
+- (NSString*)stringByreplacingOccurrencesOfCharactersInSet:(NSCharacterSet*)set withString:(NSString*)replacement;
 @end
