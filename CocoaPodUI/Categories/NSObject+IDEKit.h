@@ -32,4 +32,6 @@
 @interface NSObject (IDEKit)
 + (NSArray*)workspaceWindowControllers;
 - (void)close;
+- (void)insertText:(NSAttributedString*)text;
+- (void)setLogMode:(NSUInteger)logMode;
 @end

@@ -37,6 +37,8 @@
 
 #import <YAMLSerialization.h>
 
+#import <pthread.h>
+
 static NSString *const kReposDidRead = @"CococaPodUI:ReposDidRead";
 
 #define kAccessoryViewFieldTag 666
@@ -64,6 +66,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 @property (assign, nonatomic) BOOL needReopenWorkspace;
 @property (assign, nonatomic) BOOL installationSucceded;
 @property (assign, nonatomic) BOOL availablePodsReaded;
+@property (assign, nonatomic) BOOL enableConsoleOutput;
 @property (copy) NSError *installationError;
 
 @property (strong, nonatomic) NSMutableString *podfileText;
@@ -88,6 +91,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 - (void)loadView
 {
     [self setNeedReopenWorkspace:YES];
+    [self setEnableConsoleOutput:YES];
     
     [super loadView];
     
@@ -183,6 +187,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         NSError *error = nil;
         NSDictionary *obj = [YAMLSerialization objectWithYAMLData:yamlData options:kYAMLReadOptionStringScalars error:&error];
         if (obj && !error) {
+            [self setPodfileText:[[NSMutableString alloc] initWithData:yamlData encoding:NSUTF8StringEncoding]];
             NSArray *definitions = [obj valueForKey:@"target_definitions"];
             if ([definitions count] == 1) {
                 NSDictionary *info = [definitions objectAtIndex:0];
@@ -453,6 +458,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     __weak typeof(self) weakSelf = self;
     __block NSError *error = nil;
     __block BOOL successFlag = YES;
+    id logView = self.enableConsoleOutput ? [self logView:nil] : nil;
+    NSLog(@"%@", logView);
     [output setReadabilityHandler:^(NSFileHandle *fileHandler) {
         NSData *data = [fileHandler availableData]; // this will read to EOF, so call only once
         NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
@@ -463,7 +470,23 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
                 successFlag = NO;
             }
         }
-        [weakSelf.overlayController performSelectorOnMainThread:@selector(appendText:) withObject:[NSString stringWithFormat:@"\n%@", text] waitUntilDone:YES];
+        NSString *logString = [NSString stringWithFormat:@"\n%@", text];
+        [weakSelf.overlayController performSelectorOnMainThread:@selector(appendText:) withObject:logString waitUntilDone:YES];
+        if (logView) {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                NSString *trimmed = [logString stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                NSDateFormatter *df = [[NSDateFormatter alloc] init];
+                [df setDateFormat:@"yyyy-MM-dd hh:mm:ss.SSS"];
+                NSString *time = [df stringFromDate:[NSDate date]];
+                int pid = getpid();
+                int tid = pthread_mach_thread_np(pthread_self());
+                NSAttributedString *aString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ CocoaPodUI[%d:%d] %@", time, pid, tid, trimmed] attributes:@{NSFontAttributeName:[NSFont systemFontOfSize:13], NSForegroundColorAttributeName:RGB(0, 196, 29)}];
+                [logView setLogMode:1];
+                [logView insertText:aString];
+                [logView insertNewline:self];
+                [logView setLogMode:0];
+            });
+        }
     }];
     
     [installTask setTerminationHandler:^(NSTask *task) {
@@ -550,6 +573,32 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
             *stop = YES;
         }
     }];
+}
+
+#pragma mark
+#pragma mark IDE
+
+- (id)logView:(NSView*)parent
+{
+    if (!parent) {
+        parent = [[NSApp mainWindow] contentView];
+    }
+    __block id logView = nil;
+    __weak typeof(self) weakSelf = self;
+    [[parent subviews] enumerateObjectsUsingBlock:^(NSView *obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:NSClassFromString(@"IDEConsoleTextView")]) {
+            logView = obj;
+            *stop = YES;
+        }
+        else {
+            NSView *child = [weakSelf logView:obj];
+            if ([child isKindOfClass:NSClassFromString(@"IDEConsoleTextView")]) {
+                logView = child;
+                *stop = YES;
+            }
+        }
+    }];
+    return logView;
 }
 
 #pragma mark
