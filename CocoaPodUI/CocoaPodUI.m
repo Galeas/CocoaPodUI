@@ -73,12 +73,14 @@
 
 - (void)findGemLocation
 {
-    NSString *location = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSString *location = [defaults valueForKey:kPodGemPathKey];
     if ([location length] > 0) {
-        if (![[NSFileManager defaultManager] fileExistsAtPath:location]) {
+        if (![manager fileExistsAtPath:location]) {
 //            NSLog(@"False Location! ~ \"%@\"", location);
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:kPodGemPathKey];
-            [[NSUserDefaults standardUserDefaults] synchronize];
+            [defaults removeObjectForKey:kPodGemPathKey];
+            [defaults synchronize];
             location = nil;
         }
     }
@@ -93,9 +95,9 @@
         [sTask launch];
         NSData *data = [output readDataToEndOfFile];
         NSString *path = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
-            [[NSUserDefaults standardUserDefaults] setValue:path forKeyPath:kPodGemPathKey];
-            [[NSUserDefaults standardUserDefaults] synchronize];
+        if ([manager fileExistsAtPath:path]) {
+            [defaults setValue:path forKeyPath:kPodGemPathKey];
+            [defaults synchronize];
 //            NSLog(@"Found location: %@", path);
         }
     }

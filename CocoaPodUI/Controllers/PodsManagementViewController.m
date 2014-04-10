@@ -48,6 +48,11 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     XCodeWorkspace
 };
 
+typedef NS_ENUM(NSUInteger, PodTaskName) {
+    kReadPodfileTaskName,
+    kInstallTaskName
+};
+
 @interface PodsManagementViewController () <NSTableViewDelegate, NSTableViewDataSource, JMModalOverlayDelegate, NSFileManagerDelegate, PodEdtitionDelegate>
 {
 @private
@@ -152,34 +157,8 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         [podfileTask launch];
     }
     @catch (NSException *exception) {
-        if ([[exception reason] isEqualToString:@"launch path not accessible"]) {
-            NSAlert *alert = [[NSAlert alloc] init];
-            [alert setMessageText:@"Cocoapods gem not found"];
-            [alert addButtonWithTitle:@"Save"];
-            [alert addButtonWithTitle:@"Cancel"];
-            
-            NSTextField *field = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 4, 200, 20)];
-            [[field cell] setPlaceholderString:@"\"Pod\" gem path"];
-            [field setTag:kAccessoryViewFieldTag];
-            [[field cell] setLineBreakMode:NSLineBreakByTruncatingHead];
-            
-            NSButton *btn = [[NSButton alloc] initWithFrame:NSMakeRect(208, 0, 135, 24)];
-            [btn setTitle:@"Specify gem location"];
-            [btn setButtonType:NSMomentaryPushButton];
-            [btn setBezelStyle:NSRoundedBezelStyle];
-            [btn setTarget:self];
-            [btn setAction:@selector(specifyPodGemLocation:)];
-            
-            NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 345, 30)];
-            [accessoryView addSubview:field];
-            [accessoryView addSubview:btn];
-            
-            [alert setAccessoryView:accessoryView];
-            [alert setInformativeText:[NSString stringWithFormat:@"CocoaPodUI can't find \"pod\" gem at default %@ folder. You can specify it's location manually", [launchPath stringByDeletingLastPathComponent]]];
-            [alert setAlertStyle:NSCriticalAlertStyle];
-            [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-            return;
-        }
+        [self podGemTaskExeption:exception wrongPath:launchPath task:kReadPodfileTaskName];
+        return;
     }
     
     NSData *yamlData = [output readDataToEndOfFile];
@@ -236,21 +215,6 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
                 [self setChanged:!(exists && isDir)];
                 
                 [self.installedTable reloadData];
-            }
-        }
-    }
-}
-
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-{
-    if (returnCode == 1000) {
-        NSTextField *field = [[alert accessoryView] viewWithTag:kAccessoryViewFieldTag];
-        NSString *path = [field stringValue];
-        if ([path length] > 0) {
-            if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
-                [[NSUserDefaults standardUserDefaults] setValue:[path copy] forKey:kPodGemPathKey];
-                [[NSUserDefaults standardUserDefaults] synchronize];
-                [self loadPodsWithPath:self.path];
             }
         }
     }
@@ -349,6 +313,59 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     [self setAvailablePods:[NSArray arrayWithArray:content]];
     [[NSNotificationCenter defaultCenter] postNotificationName:kReposDidRead object:nil];
     [self didChangeValueForKey:@"availablePods"];
+}
+
+#pragma mark
+#pragma mark Pod gem task exeptions handling
+
+- (void)podGemTaskExeption:(NSException*)exception wrongPath:(NSString*)launchPath task:(PodTaskName)task
+{
+    NSString *reason = [exception reason];
+    if ([reason isEqualToString:@"launch path not accessible"] || [reason isEqualToString:@"must provide a launch path"]) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Cocoapods gem not found"];
+        [alert addButtonWithTitle:@"Save"];
+        [alert addButtonWithTitle:@"Cancel"];
+        
+        NSTextField *field = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 4, 200, 20)];
+        [[field cell] setPlaceholderString:@"\"Pod\" gem path"];
+        [field setTag:kAccessoryViewFieldTag];
+        [[field cell] setLineBreakMode:NSLineBreakByTruncatingHead];
+        
+        NSButton *btn = [[NSButton alloc] initWithFrame:NSMakeRect(208, 0, 135, 24)];
+        [btn setTitle:@"Specify gem location"];
+        [btn setButtonType:NSMomentaryPushButton];
+        [btn setBezelStyle:NSRoundedBezelStyle];
+        [btn setTarget:self];
+        [btn setAction:@selector(specifyPodGemLocation:)];
+        
+        NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 345, 30)];
+        [accessoryView addSubview:field];
+        [accessoryView addSubview:btn];
+        
+        [alert setAccessoryView:accessoryView];
+        [alert setInformativeText:[NSString stringWithFormat:@"CocoaPodUI can't find \"pod\" gem at default %@ folder. You can specify it's location manually", [launchPath stringByDeletingLastPathComponent]]];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)([NSNumber numberWithUnsignedInteger:task])];
+    }
+}
+
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+{
+    if (returnCode == 1000) {
+        NSTextField *field = [[alert accessoryView] viewWithTag:kAccessoryViewFieldTag];
+        NSString *path = [field stringValue];
+        if ([path length] > 0) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+                [[NSUserDefaults standardUserDefaults] setValue:[path copy] forKey:kPodGemPathKey];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                PodTaskName task = [(__bridge NSNumber*)(contextInfo) unsignedIntegerValue];
+                if (task == kReadPodfileTaskName) {
+                    [self loadPodsWithPath:self.path];
+                }
+            }
+        }
+    }
 }
 
 #pragma mark
@@ -459,7 +476,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     __block NSError *error = nil;
     __block BOOL successFlag = YES;
     id logView = self.enableConsoleOutput ? [self logView:nil] : nil;
-    NSLog(@"%@", logView);
+//    NSLog(@"%@", logView);
     [output setReadabilityHandler:^(NSFileHandle *fileHandler) {
         NSData *data = [fileHandler availableData]; // this will read to EOF, so call only once
         NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
@@ -498,7 +515,13 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
     environment[@"LC_ALL"]=@"en_US.UTF-8";
     [installTask setEnvironment:environment];
-    [installTask launch];
+    @try {
+        [installTask launch];
+    }
+    @catch (NSException *exception) {
+        [self podGemTaskExeption:exception wrongPath:launchPath task:kInstallTaskName];
+        return;
+    }
     
     [installTask waitUntilExit];
 }
