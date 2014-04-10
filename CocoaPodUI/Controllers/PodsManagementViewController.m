@@ -141,22 +141,32 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 {
     [self setPath:path];
     
+//    NSLog(@"CocoaPodUI::%s ~ PodfilePath:%@", __PRETTY_FUNCTION__, self.path);
+    
     NSTask *podfileTask = [[NSTask alloc] init];
-    NSArray *args = @[@"ipc", @"podfile", path, @"--no-color"];
-    NSString *launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
-    [podfileTask setLaunchPath:launchPath];
-    [podfileTask setArguments:args];
     NSPipe *pipeOut = [NSPipe pipe];
     [podfileTask setStandardOutput:pipeOut];
     NSFileHandle *output = [pipeOut fileHandleForReading];
-    NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
-    environment[@"LC_ALL"]=@"en_US.UTF-8";
-    [podfileTask setEnvironment:environment];
     
+    NSString *launchPath = nil;
+    NSArray *args = nil;
+
     @try {
+        launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+        args = @[@"ipc", @"podfile", path, @"--no-color"];
+//        NSLog(@"CocoaPodUI::%s ~ LaunchPath:%@", __PRETTY_FUNCTION__, launchPath);
+
+        [podfileTask setLaunchPath:launchPath];
+        [podfileTask setArguments:args];
+        NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+        environment[@"LC_ALL"]=@"en_US.UTF-8";
+        [podfileTask setEnvironment:environment];
+
+//        NSLog(@"CocoaPodUI::%s ~ Try to Launch", __PRETTY_FUNCTION__);
         [podfileTask launch];
     }
     @catch (NSException *exception) {
+//        NSLog(@"CocoaPodUI::%s ~ Exception Reason:%@", __PRETTY_FUNCTION__, exception.reason);
         [self podGemTaskExeption:exception wrongPath:launchPath task:kReadPodfileTaskName];
         return;
     }
@@ -320,6 +330,8 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 
 - (void)podGemTaskExeption:(NSException*)exception wrongPath:(NSString*)launchPath task:(PodTaskName)task
 {
+//    NSLog(@"CocoaPodUI::%s ~ Exception Handling", __PRETTY_FUNCTION__);
+    
     NSString *reason = [exception reason];
     if ([reason isEqualToString:@"launch path not accessible"] || [reason isEqualToString:@"must provide a launch path"]) {
         NSAlert *alert = [[NSAlert alloc] init];
@@ -346,19 +358,25 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
         [alert setAccessoryView:accessoryView];
         [alert setInformativeText:[NSString stringWithFormat:@"CocoaPodUI can't find \"pod\" gem at default %@ folder. You can specify it's location manually", [launchPath stringByDeletingLastPathComponent]]];
         [alert setAlertStyle:NSCriticalAlertStyle];
+        
+//        NSLog(@"CocoaPodUI::%s ~ Alert created", __PRETTY_FUNCTION__);
+        
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)([NSNumber numberWithUnsignedInteger:task])];
     }
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 {
+//    NSLog(@"CocoaPodUI::%s", __PRETTY_FUNCTION__);
     if (returnCode == 1000) {
         NSTextField *field = [[alert accessoryView] viewWithTag:kAccessoryViewFieldTag];
         NSString *path = [field stringValue];
+//        NSLog(@"CocoaPodUI::%s ~ GemPath:%@", __PRETTY_FUNCTION__, path);
         if ([path length] > 0) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
                 [[NSUserDefaults standardUserDefaults] setValue:[path copy] forKey:kPodGemPathKey];
                 [[NSUserDefaults standardUserDefaults] synchronize];
+//                NSLog(@"CocoaPodUI::%s ~ GemPathSaved:%@", __PRETTY_FUNCTION__, [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey]);
                 PodTaskName task = [(__bridge NSNumber*)(contextInfo) unsignedIntegerValue];
                 if (task == kReadPodfileTaskName) {
                     [self loadPodsWithPath:self.path];
@@ -529,6 +547,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 - (NSString*)podfileString
 {
     NSMutableString *podfileText = [[self.podfileText stringByreplacingOccurrencesOfCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"`\""] withString:@"'"] mutableCopy];
+    
     NSString *firstLine = [[podfileText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] firstObject];
     NSRange range = [podfileText rangeOfString:firstLine];
     if (range.location != NSNotFound) {
@@ -541,7 +560,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
         __block NSUInteger length = 0;
         [podfileText enumerateSubstringsInRange:NSMakeRange(startPodsSection, [podfileText length] - startPodsSection) options:NSStringEnumerationByLines usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
             if ([substring hasPrefix:@"pod"]) {
-                length += substringRange.length;
+                length += enclosingRange.length;
             }
         }];
         NSMutableString *inTable = [NSMutableString string];
@@ -553,8 +572,9 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
                 [inTable appendFormat:@"%@pod '%@', '%@ %@'", idx == 0 ? @"" : @"\n", item.name, item.versionModifier, item.version];
             }
         }];
-        [podfileText replaceCharactersInRange:NSMakeRange(startPodsSection, ++length) withString:inTable];
+        [podfileText replaceCharactersInRange:NSMakeRange(startPodsSection, length) withString:inTable];
     }
+
     return [NSString stringWithString:podfileText];
 }
 
