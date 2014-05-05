@@ -7,12 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D0F62F918FD6024001F50AE /* PodfileParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D0F62F818FD6024001F50AE /* PodfileParser.m */; };
 		6D227A8B18C2264D000431E2 /* CreatePodController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6DCB578A18C21FAE00AA37E2 /* CreatePodController.xib */; };
 		6D25F22D18C27BC000298455 /* NSWindow+Sizing.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D25F22C18C27BC000298455 /* NSWindow+Sizing.m */; };
+		6D280BB1190A8C0300220C9B /* AvailableTableDragDropSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D280BB0190A8C0300220C9B /* AvailableTableDragDropSource.m */; };
 		6D679C4918C2694F00B177EB /* PodsManagementViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D679C4718C2694F00B177EB /* PodsManagementViewController.m */; };
 		6D679C4A18C2694F00B177EB /* PodsManagementViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */; };
 		6D74161418ED42F6002F111A /* NSString+Extra.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D74161318ED42F6002F111A /* NSString+Extra.m */; };
 		6D8B7C9A18C22B0E0040A5C7 /* NSView+Frame.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D8B7C9918C22B0E0040A5C7 /* NSView+Frame.m */; };
+		6DB207011906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DB207001906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m */; };
 		6DCB578B18C21FAE00AA37E2 /* CreatePodController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DCB578918C21FAE00AA37E2 /* CreatePodController.m */; };
 		6DE28F3918EAD8C70025F471 /* YAML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DE28F3018EAD8B70025F471 /* YAML.framework */; };
 		D612005F18D9FE28006FC060 /* PodEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = D612005D18D9FE28006FC060 /* PodEditController.m */; };
@@ -72,8 +75,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6D0F62F718FD6024001F50AE /* PodfileParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodfileParser.h; path = Classes/PodfileParser.h; sourceTree = "<group>"; };
+		6D0F62F818FD6024001F50AE /* PodfileParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodfileParser.m; path = Classes/PodfileParser.m; sourceTree = "<group>"; };
 		6D25F22B18C27BC000298455 /* NSWindow+Sizing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSWindow+Sizing.h"; path = "Categories/NSWindow+Sizing.h"; sourceTree = "<group>"; };
 		6D25F22C18C27BC000298455 /* NSWindow+Sizing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSWindow+Sizing.m"; path = "Categories/NSWindow+Sizing.m"; sourceTree = "<group>"; };
+		6D280BAF190A8C0300220C9B /* AvailableTableDragDropSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvailableTableDragDropSource.h; path = Classes/AvailableTableDragDropSource.h; sourceTree = "<group>"; };
+		6D280BB0190A8C0300220C9B /* AvailableTableDragDropSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AvailableTableDragDropSource.m; path = Classes/AvailableTableDragDropSource.m; sourceTree = "<group>"; };
 		6D679C4618C2694F00B177EB /* PodsManagementViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodsManagementViewController.h; path = Controllers/PodsManagementViewController.h; sourceTree = "<group>"; };
 		6D679C4718C2694F00B177EB /* PodsManagementViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodsManagementViewController.m; path = Controllers/PodsManagementViewController.m; sourceTree = "<group>"; };
 		6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodsManagementViewController.xib; path = Controllers/PodsManagementViewController.xib; sourceTree = "<group>"; };
@@ -81,6 +88,8 @@
 		6D74161318ED42F6002F111A /* NSString+Extra.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Extra.m"; path = "Categories/NSString+Extra.m"; sourceTree = "<group>"; };
 		6D8B7C9818C22B0E0040A5C7 /* NSView+Frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSView+Frame.h"; path = "Categories/NSView+Frame.h"; sourceTree = "<group>"; };
 		6D8B7C9918C22B0E0040A5C7 /* NSView+Frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSView+Frame.m"; path = "Categories/NSView+Frame.m"; sourceTree = "<group>"; };
+		6DB206FF1906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RSVerticallyCenteredTextFieldCell.h; path = Views/Cells/RSVerticallyCenteredTextFieldCell.h; sourceTree = "<group>"; };
+		6DB207001906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RSVerticallyCenteredTextFieldCell.m; path = Views/Cells/RSVerticallyCenteredTextFieldCell.m; sourceTree = "<group>"; };
 		6DCB578818C21FAE00AA37E2 /* CreatePodController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CreatePodController.h; path = Controllers/CreatePodController.h; sourceTree = "<group>"; };
 		6DCB578918C21FAE00AA37E2 /* CreatePodController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CreatePodController.m; path = Controllers/CreatePodController.m; sourceTree = "<group>"; };
 		6DCB578A18C21FAE00AA37E2 /* CreatePodController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CreatePodController.xib; path = Controllers/CreatePodController.xib; sourceTree = "<group>"; };
@@ -195,6 +204,8 @@
 			children = (
 				D6435B8818C0953400138E05 /* PodCell.h */,
 				D6435B8918C0953400138E05 /* PodCell.m */,
+				6DB206FF1906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.h */,
+				6DB207001906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m */,
 			);
 			name = Cells;
 			sourceTree = "<group>";
@@ -204,6 +215,10 @@
 			children = (
 				D6544ADA18BF8A19004B595B /* PodItem.h */,
 				D6544ADB18BF8A19004B595B /* PodItem.m */,
+				6D0F62F718FD6024001F50AE /* PodfileParser.h */,
+				6D0F62F818FD6024001F50AE /* PodfileParser.m */,
+				6D280BAF190A8C0300220C9B /* AvailableTableDragDropSource.h */,
+				6D280BB0190A8C0300220C9B /* AvailableTableDragDropSource.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -406,9 +421,12 @@
 				D612005F18D9FE28006FC060 /* PodEditController.m in Sources */,
 				D67E063F18C60F1E00200343 /* PodsOverlayController.m in Sources */,
 				6D25F22D18C27BC000298455 /* NSWindow+Sizing.m in Sources */,
+				6D0F62F918FD6024001F50AE /* PodfileParser.m in Sources */,
 				D6FA49D518BF46E50082B98D /* CocoaPodUI.m in Sources */,
+				6D280BB1190A8C0300220C9B /* AvailableTableDragDropSource.m in Sources */,
 				6D8B7C9A18C22B0E0040A5C7 /* NSView+Frame.m in Sources */,
 				D67E063918C60DFC00200343 /* JMOverlayView.m in Sources */,
+				6DB207011906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m in Sources */,
 				6D74161418ED42F6002F111A /* NSString+Extra.m in Sources */,
 				6DCB578B18C21FAE00AA37E2 /* CreatePodController.m in Sources */,
 			);

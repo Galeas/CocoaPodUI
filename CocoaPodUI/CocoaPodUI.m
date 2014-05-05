@@ -76,15 +76,14 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSFileManager *manager = [NSFileManager defaultManager];
     NSString *location = [defaults valueForKey:kPodGemPathKey];
+
     if ([location length] > 0) {
         if (![manager fileExistsAtPath:location]) {
-//            NSLog(@"False Location! ~ \"%@\"", location);
             [defaults removeObjectForKey:kPodGemPathKey];
             [defaults synchronize];
             location = nil;
         }
     }
-//    NSLog(@"Saved Location: %@", location);
     if ([location length] == 0) {
         NSTask *sTask = [[NSTask alloc] init];
         [sTask setArguments:@[@"pod"]];
@@ -98,7 +97,6 @@
         if ([manager fileExistsAtPath:path]) {
             [defaults setValue:path forKeyPath:kPodGemPathKey];
             [defaults synchronize];
-//            NSLog(@"Found location: %@", path);
         }
     }
 }

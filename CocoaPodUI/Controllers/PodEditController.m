@@ -52,6 +52,10 @@
         }
     }
     _item = item;
+    [self setNeedGit:(_item.gitURL != nil)];
+    [self setNeedPath:(_item.path != nil)];
+    [self setNeedPodspec:(_item.podspecURL != nil)];
+    [self setNeedCommit:(_item.commit != nil)];
     [_item addObserver:self forKeyPath:@"version" options:NSKeyValueObservingOptionNew context:NULL];
 }
 

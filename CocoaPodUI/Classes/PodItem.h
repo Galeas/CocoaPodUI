@@ -31,12 +31,16 @@ extern NSString *const kAddPodNotificationName;
 extern NSString *const kDeletePodNotificationName;
 extern NSString *const kEditPodNotificationName;
 
-@interface PodItem : NSObject <NSCopying>
+@interface PodItem : NSObject
 - (void)setPodspecData:(NSData*)data;
 @property (strong, nonatomic) NSString *repoPath;
-@property (strong, nonatomic) NSString *summary;
-@property (strong, nonatomic) NSString *version;
-@property (strong, nonatomic) NSString *versionModifier;
-@property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) NSArray *versions;
+@property (copy, nonatomic) NSString *summary;
+@property (copy, nonatomic) NSString *version;
+@property (copy, nonatomic) NSString *versionModifier;
+@property (copy, nonatomic) NSString *name;
+@property (copy, nonatomic) NSArray *versions;
+@property (copy, nonatomic) NSURL *gitURL;
+@property (copy, nonatomic) NSString *commit;
+@property (copy, nonatomic) NSURL *podspecURL;
+@property (copy, nonatomic) NSString *path;
 @end

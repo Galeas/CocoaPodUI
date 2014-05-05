@@ -36,5 +36,9 @@
 @interface PodEditController : NSWindowController
 @property (strong, nonatomic) PodItem *item;
 @property (weak) NSObject<PodEdtitionDelegate> *delegate;
+@property (assign, nonatomic) BOOL needGit;
+@property (assign, nonatomic) BOOL needCommit;
+@property (assign, nonatomic) BOOL needPodspec;
+@property (assign, nonatomic) BOOL needPath;
 - (IBAction)closeAction:(id)sender;
 @end

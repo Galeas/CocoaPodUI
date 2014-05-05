@@ -1,8 +1,8 @@
 //
-//  NSString+Extra.h
+//  AvailableTableDelegate.h
 //  CocoaPodUI
 //
-//  Created by Evgeniy Kratko on 03.04.14.
+//  Created by Evgeniy Kratko on 25.04.14.
 //  Copyright (c) 2014 akki. All rights reserved.
 //
 //Copyright (c) 2014 Yevgeniy Branitsky (Kratko)
@@ -27,8 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSString (Extra)
-- (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second;
-- (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second inRange:(NSRange)range;
-- (NSString*)stringByreplacingOccurrencesOfCharactersInSet:(NSCharacterSet*)set withString:(NSString*)replacement;
+@interface AvailableTableDragDropSource : NSObject<NSTableViewDataSource>
+
 @end

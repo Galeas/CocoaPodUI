@@ -1,8 +1,8 @@
 //
-//  NSString+Extra.h
+//  PodfileParser.h
 //  CocoaPodUI
 //
-//  Created by Evgeniy Kratko on 03.04.14.
+//  Created by Evgeniy Kratko on 15.04.14.
 //  Copyright (c) 2014 akki. All rights reserved.
 //
 //Copyright (c) 2014 Yevgeniy Branitsky (Kratko)
@@ -27,8 +27,21 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSString (Extra)
-- (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second;
-- (NSString*)stringBetweenString:(NSString *)first andString:(NSString *)second inRange:(NSRange)range;
-- (NSString*)stringByreplacingOccurrencesOfCharactersInSet:(NSCharacterSet*)set withString:(NSString*)replacement;
+static NSString *const kPodfileTargetName = @"CocoaPodUI::TargetName";
+static NSString *const kPodfileDefaultTargetName = @"CocoaPodUI::DefaultTarget";
+static NSString *const kPodfileTargetRange = @"CocoaPodUI::TargetRange";
+
+@interface PodfileParser : NSObject
+{
+    @private
+    NSString *_content;
+}
++ (instancetype)parserWithContentsOfFile:(NSString*)path;
+- (NSString*)platformLine:(NSRange*)range;
+- (NSUInteger)targetCount;
+- (NSDictionary*)targetAtIndex:(NSUInteger)index;
+- (NSString*)preinstallHook:(NSRange*)range;
+- (NSString*)postinstallHook:(NSRange*)range;
+- (BOOL)hasPreinstallHook;
+- (BOOL)hasPostinstallHook;
 @end
