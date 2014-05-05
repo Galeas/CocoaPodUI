@@ -486,7 +486,6 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
     if (dropOperation == NSTableViewDropAbove) {
         NSPasteboard *pboard = [info draggingPasteboard];
         NSData *data = [pboard dataForType:kPodDataType];
-        NSUInteger index = row <= [self.installedPods count] ? row : [self.installedPods count];
         PodItem *item = nil;
         if ([info draggingSource] != self.installedTable) {
             item = [NSKeyedUnarchiver unarchiveObjectWithData:data];
@@ -496,6 +495,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
             item = [self.installedPods objectAtIndex:[indexes firstIndex]];
         }
         [self.installedPods removeObject:item];
+        NSUInteger index = row <= [self.installedPods count] ? row : [self.installedPods count];
         [self.installedPods insertObject:item atIndex:index];
         [self.installedTable reloadData];
         [self setChanged:YES];
