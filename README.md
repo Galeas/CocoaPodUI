@@ -43,6 +43,6 @@ scenarios.
 - **v.1.0**
     * Basic capabilities: «Podfile» creation and pods installation. Cleaning up project from pods.
 
-<img src="http://i1199.photobucket.com/albums/aa470/Akki-87/Fotor0320183341.png">
+<img src="https://github.com/Galeas/CocoaPodUI/blob/master/readme.png">
 
 Special thanks to [kodlian (JMModalOverlay)](https://github.com/kodlian/JMModalOverlay)
