@@ -550,7 +550,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 - (void)modalOverlayDidShow:(NSNotification *)notification
 {
 //    NSLog(@"%@", [notification object]);
-    PodTask task = [[notification object] task];
+    PodTask task = [(JMModalOverlay*)[notification object] task];
     NSLog(@"COCOAPODUI::TASK::%@", task == kUpdateTaskName ? @"Update" : @"Install");
     __weak typeof(self) weakSelf = self;
     [self installTask:task completion:^(BOOL success, NSError *error) {
@@ -1134,11 +1134,13 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (IBAction)updatePods:(id)sender
 {
-    if (![self.overlay isShown]) {
-        [self.overlayController.taskLable setStringValue:@"Updating Pods..."];
-        [self.overlayController animateProgress:YES];
-        [self.overlay setTask:kUpdateTaskName];
-        [self.overlay showInWindow:[[self view] window]];
+    if ([self savePodfile]) {
+        if (![self.overlay isShown]) {
+            [self.overlayController.taskLable setStringValue:@"Updating Pods..."];
+            [self.overlayController animateProgress:YES];
+            [self.overlay setTask:kUpdateTaskName];
+            [self.overlay showInWindow:[[self view] window]];
+        }
     }
 }
 
