@@ -15,7 +15,7 @@ Just remove CocoaPodUI.xcplugin from ~/Library/Application Support/Developer/Sha
 Version History
 ---------------
 - **v.1.2**
-    * New pod spec format support.
+    * New podspec format support.
     * Checking for outdated Pods and it’s updating.
     * Badge on Xcode Dock icon with outdated Pods count
 - **v.1.1**
