@@ -14,6 +14,8 @@ Just remove CocoaPodUI.xcplugin from ~/Library/Application Support/Developer/Sha
 
 Version History
 ---------------
+- **v.1.2.1**
+    * Add Xcode 6-beta support.
 - **v.1.2**
     * New podspec format support.
     * Checking for outdated Pods and it’s updating.
