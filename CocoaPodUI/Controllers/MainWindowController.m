@@ -68,6 +68,11 @@
             id workspace = [controller valueForKey:@"_workspace"];
             NSString *filePath = [[workspace valueForKey:@"representingFilePath"] valueForKey:@"pathString"];
             NSString *projectName = [[filePath lastPathComponent] stringByDeletingPathExtension];
+            NSLog(@"CocoaPodUI::ProjectName::%@", projectName);
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf) {
+                strongSelf->_projectName = projectName;
+            }
             NSString *infoPlistPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@-Info.plist", projectName, projectName]];
             NSDictionary *infoPlist = [NSDictionary dictionaryWithContentsOfFile:infoPlistPath];
             if (infoPlist) {

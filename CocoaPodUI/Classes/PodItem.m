@@ -39,19 +39,38 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
 
 @implementation PodItem
 
-- (void)setPodspecData:(NSData *)data
+- (id)init
 {
-    NSParameterAssert(data);
+    self = [super init];
+    if (self) {
+        [self setOutdated:NO];
+    }
+    return self;
+}
+
+- (instancetype)initWithPath:(NSString *)repoPath
+{
+    self = [super init];
+    if (self) {
+        [self setOutdated:NO];
+        self->_repoPath = repoPath;
+        self->_name = [[[repoPath lastPathComponent] stringByDeletingPathExtension] stringByDeletingPathExtension];
+        self->_versionModifier = kVersionModeEquals;
+        NSData *data = [NSData dataWithContentsOfFile:self->_repoPath];
+        [[_repoPath pathExtension] isEqualToString:@"json"] ? [self setDataFromJSON:data] : [self setDataFromYAML:data];
+    }
+    return self;
+}
+
+- (void)setDataFromYAML:(NSData *)data
+{
+    NSAssert(data, @"PODSPEC DATA IS NULL, %s", __PRETTY_FUNCTION__);
     
     NSString *podspecString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSCharacterSet *restrictedSet = [NSCharacterSet characterSetWithCharactersInString:@" \t'\""];
     CGFloat lenght = [podspecString length];
     NSRange range;
     @try {
-        range = [podspecString rangeOfString:@".name"];
-        NSString *nameString = [podspecString stringBetweenString:@"=" andString:@"\n" inRange:NSMakeRange(range.location, lenght - range.location)];
-        _name = [nameString stringByTrimmingCharactersInSet:restrictedSet];
-        
         range = [podspecString rangeOfString:@".version"];
         NSString *versionString = [podspecString stringBetweenString:@"=" andString:@"\n" inRange:NSMakeRange(range.location, lenght - range.location)];
         _version = [versionString stringByTrimmingCharactersInSet:restrictedSet];
@@ -62,6 +81,20 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
     }
     @catch (NSException *exception) {
         NSLog(@"%@", self.repoPath);
+    }
+}
+
+- (void)setDataFromJSON:(NSData*)data
+{
+    NSAssert(data, @"PODSPEC DATA IS NULL, %s", __PRETTY_FUNCTION__);
+    
+    NSError *error = nil;
+    NSDictionary *info = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    if (!error) {
+        NSCharacterSet *restrictedSet = [NSCharacterSet characterSetWithCharactersInString:@" \t'\""];
+        _version = [[info valueForKey:@"version"] stringByTrimmingCharactersInSet:restrictedSet];
+        _summary = [[info valueForKey:@"summary"] stringByTrimmingCharactersInSet:restrictedSet];
+//        _gitURL = [NSURL URLWithString:[[info valueForKeyPath:@"source.git"] stringByTrimmingCharactersInSet:restrictedSet]];
     }
 }
 
@@ -82,7 +115,7 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
 
 - (NSArray *)possibleVersionModifiers
 {
-    return @[@" ", @"=", @"~>", @">", @">=", @"<", @"<="];
+    return @[kVersionModeEmpty, kVersionModeEquals, kVersionModeUpToMajor, kVersionModeAnyHigher, kVersionModeIncludeAndHigher, kVersionModeAnyLower, kVersionModeIncludeAndLower];
 }
 
 #pragma mark
@@ -97,11 +130,12 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
     copyItem->_summary = [self.summary copyWithZone:zone];
     copyItem->_versionModifier = [self.versionModifier copyWithZone:zone];
     copyItem->_versions = [self.versions copyWithZone:zone];
-    copyItem->_repoPath = [self.repoPath copyWithZone:zone];
+//    copyItem->_repoPath = [self.repoPath copyWithZone:zone];
     copyItem->_commit = [self.commit copyWithZone:zone];
     copyItem->_gitURL = [self.gitURL copyWithZone:zone];
     copyItem->_podspecURL = [self.podspecURL copyWithZone:zone];
     copyItem->_path = [self.path copyWithZone:zone];
+    copyItem->_outdated = self.outdated;
     
     return copyItem;
 }
@@ -125,11 +159,12 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
         [self setVersion:[aDecoder decodeObjectForKey:@"version"]];
         [self setVersions:[aDecoder decodeObjectForKey:@"versions"]];
         [self setVersionModifier:[aDecoder decodeObjectForKey:@"versionModifier"]];
-        [self setRepoPath:[aDecoder decodeObjectForKey:@"repoPath"]];
+//        [self setRepoPath:[aDecoder decodeObjectForKey:@"repoPath"]];
         [self setCommit:[aDecoder decodeObjectForKey:@"commit"]];
         [self setGitURL:[aDecoder decodeObjectForKey:@"gitURL"]];
         [self setPodspecURL:[aDecoder decodeObjectForKey:@"podspecURL"]];
         [self setPath:[aDecoder decodeObjectForKey:@"path"]];
+        [self setOutdated:[[aDecoder decodeObjectForKey:@"outdated"] boolValue]];
         
         return self;
     }
@@ -143,10 +178,11 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
     [aCoder encodeObject:self.version forKey:@"version"];
     [aCoder encodeObject:self.versions forKey:@"versions"];
     [aCoder encodeObject:self.versionModifier forKey:@"versionModifier"];
-    [aCoder encodeObject:self.repoPath forKey:@"repoPath"];
+//    [aCoder encodeObject:self.repoPath forKey:@"repoPath"];
     [aCoder encodeObject:self.commit forKey:@"commit"];
     [aCoder encodeObject:self.gitURL forKey:@"gitURL"];
     [aCoder encodeObject:self.podspecURL forKey:@"podspecURL"];
     [aCoder encodeObject:self.path forKey:@"path"];
+    [aCoder encodeObject:@(self.outdated) forKey:@"outdated"];
 }
 @end

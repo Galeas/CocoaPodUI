@@ -28,6 +28,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface PodsOverlayController : NSViewController
+@property (weak) IBOutlet NSTextField *taskLable;
 - (void)animateProgress:(BOOL)animate;
 - (void)appendText:(NSString*)text;
 - (void)setText:(NSString*)text;

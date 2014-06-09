@@ -31,9 +31,18 @@ extern NSString *const kAddPodNotificationName;
 extern NSString *const kDeletePodNotificationName;
 extern NSString *const kEditPodNotificationName;
 
+static NSString *const kVersionModeEmpty = @" ";
+static NSString *const kVersionModeEquals = @"=";
+static NSString *const kVersionModeUpToMajor = @"~>";
+static NSString *const kVersionModeAnyHigher = @">";
+static NSString *const kVersionModeIncludeAndHigher = @">=";
+static NSString *const kVersionModeAnyLower = @"<";
+static NSString *const kVersionModeIncludeAndLower = @"<=";
+
 @interface PodItem : NSObject
-- (void)setPodspecData:(NSData*)data;
-@property (strong, nonatomic) NSString *repoPath;
+- (instancetype)initWithPath:(NSString*)repoPath;
+//- (void)setPodspecData:(NSData*)data;
+@property (readonly, nonatomic) NSString *repoPath;
 @property (copy, nonatomic) NSString *summary;
 @property (copy, nonatomic) NSString *version;
 @property (copy, nonatomic) NSString *versionModifier;
@@ -43,4 +52,5 @@ extern NSString *const kEditPodNotificationName;
 @property (copy, nonatomic) NSString *commit;
 @property (copy, nonatomic) NSURL *podspecURL;
 @property (copy, nonatomic) NSString *path;
+@property (assign, nonatomic) BOOL outdated;
 @end

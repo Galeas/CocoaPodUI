@@ -49,6 +49,7 @@
 {
     NSAttributedString *str = [[NSAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName:[NSFont fontWithName:@"Menlo" size:12], NSForegroundColorAttributeName:[NSColor whiteColor]}];
     [[self.textView textStorage] appendAttributedString:str];
+    [self.textView scrollRangeToVisible:[[[self.textView textStorage] string] rangeOfString:text]];
 }
 
 - (void)setText:(NSString *)text

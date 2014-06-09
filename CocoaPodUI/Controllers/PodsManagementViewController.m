@@ -26,6 +26,7 @@
 //THE SOFTWARE.
 
 #import "PodsManagementViewController.h"
+#import "MainWindowController.h"
 #import "PodEditController.h"
 #import "PodsOverlayController.h"
 #import "PodItem.h"
@@ -34,11 +35,13 @@
 
 #import "NSObject+IDEKit.h"
 #import "NSString+Extra.h"
+#import "JMModalOverlay+Task.h"
 
 #import <YAMLSerialization.h>
 #import "PodfileParser.h"
 
 #import <pthread.h>
+#import "PodTask.h"
 
 static NSString *const kReposDidRead = @"CococaPodUI:ReposDidRead";
 
@@ -49,11 +52,6 @@ static NSString *const kReposDidRead = @"CococaPodUI:ReposDidRead";
 typedef NS_ENUM(NSUInteger, ProjectFileType) {
     XCodeProject,
     XCodeWorkspace
-};
-
-typedef NS_ENUM(NSUInteger, PodTaskName) {
-    kReadPodfileTaskName,
-    kInstallTaskName
 };
 
 @interface PodsManagementViewController () <NSTableViewDelegate, NSTableViewDataSource, JMModalOverlayDelegate, NSFileManagerDelegate, PodEdtitionDelegate, NSTextFieldDelegate>
@@ -71,21 +69,33 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 @property (strong, nonatomic) NSString *platformName;
 @property (strong, nonatomic) NSString *platformVersion;
 @property (readonly) NSArray *platformVersions;
+@property (copy) NSError *installationError;;
+@property (strong, nonatomic) NSMutableDictionary *outdatedSheet;
+
 @property (assign, nonatomic) BOOL changed;
 @property (assign, nonatomic) BOOL needReopenWorkspace;
 @property (assign, nonatomic) BOOL installationSucceded;
 @property (assign, nonatomic) BOOL availablePodsReaded;
 @property (assign, nonatomic) BOOL enableConsoleOutput;
-@property (copy) NSError *installationError;
+@property (assign, nonatomic) BOOL needCheckOutdated;
+@property (assign, nonatomic) BOOL needOutdatedCounter;
+@property (assign, nonatomic) BOOL hasOutdated;
 
 @property (weak) IBOutlet NSTableView *installedTable;
 @property (weak) IBOutlet NSTableView *availableTable;
+@property (weak) IBOutlet NSProgressIndicator *repoReadProgressBar;
+@property (weak) IBOutlet NSButton *updateButton;
 
 - (IBAction)saveAndInstallAction:(id)sender;
+
 - (IBAction)closeAction:(id)sender;
 - (IBAction)deleteAllPods:(id)sender;
 - (IBAction)deleteTarget:(id)sender;
 - (IBAction)addTarget:(id)sender;
+
+- (IBAction)switchOutdatedCheck:(id)sender;
+- (IBAction)switchOutdatedBadge:(id)sender;
+- (IBAction)updatePods:(id)sender;
 @end
 
 @implementation PodsManagementViewController
@@ -93,18 +103,43 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 - (id)init
 {
     self = [super initWithNibName:@"PodsManagementViewController" bundle:[NSBundle bundleForClass:[self class]]];
-    [self setInstalledPods:[NSMutableArray array]];
-    [[NSFileManager defaultManager] setDelegate:self];
+    if (self) {
+        [self setInstalledPods:[NSMutableArray array]];
+        [[NSFileManager defaultManager] setDelegate:self];
+        
+        [self setNeedCheckOutdated:[[NSUserDefaults standardUserDefaults] boolForKey:kNeedCheckOutdatedPods]];
+        [self setNeedOutdatedCounter:[[NSUserDefaults standardUserDefaults] boolForKey:kNeedShowOutdatedPodsCount]];
+        
+        self->_outdatedSheet = [NSMutableDictionary dictionary];
+        [NSApp addObserver:self forKeyPath:@"mainWindow" options:NSKeyValueObservingOptionNew context:NULL];
+    }
     return self;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    NSString *title = [[NSApp mainWindow] title];
+    if (title && self.needOutdatedCounter) {
+        NSArray *keys = [[self.outdatedSheet allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%@ BEGINSWITH SELF", title]];
+        if ([keys count] == 1) {
+            NSUInteger outdatedCount = [[self.outdatedSheet valueForKey:[keys firstObject]] unsignedIntegerValue];
+            [[NSApp dockTile] setBadgeLabel:outdatedCount > 0 ? [NSString stringWithFormat:@"%ld", outdatedCount] : nil];
+        }
+        else {
+            [[NSApp dockTile] setBadgeLabel:nil];
+        }
+    }
 }
 
 - (void)loadView
 {
     [self setNeedReopenWorkspace:YES];
     [self setEnableConsoleOutput:YES];
+    [self setHasOutdated:NO];
     
     [super loadView];
     
+    [self.updateButton setEnabled:NO];
     [self.installedTable registerForDraggedTypes:@[kPodDataType]];
     [self.availableTable registerForDraggedTypes:@[kPodDataType]];
     
@@ -121,6 +156,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
     [overlay setContentViewController:overlayController];
     [self setOverlayController:overlayController];
     
+    [self.repoReadProgressBar setHidden:NO];
     [self performSelectorInBackground:@selector(loadAvailablePods) withObject:nil];
 }
 
@@ -159,7 +195,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 
     @try {
         launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
-        args = @[@"ipc", @"podfile", path, @"--no-color"];
+        args = @[@"ipc", @"podfile", path];
 //        NSLog(@"CocoaPodUI::%s ~ LaunchPath:%@", __PRETTY_FUNCTION__, launchPath);
 
         [podfileTask setLaunchPath:launchPath];
@@ -198,7 +234,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
                             NSArray *versionComponents = [property componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                             if ([versionComponents count] == 1) {
                                 [item setVersion:[versionComponents firstObject]];
-                                [item setVersionModifier:@"="];
+                                [item setVersionModifier:kVersionModeEquals];
                             }
                             else if ([versionComponents count] > 1) {
                                 [item setVersionModifier:[versionComponents firstObject]];
@@ -263,6 +299,9 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
             [self setChanged:!(exists && isDir)];
             
             [self.installedTable reloadData];
+            if (self.needCheckOutdated) {
+                [self switchOutdatedCheck:self];
+            }
         }
     }
 }
@@ -305,7 +344,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
                         [item setVersion:[versionParts count] == 1 ? [versionParts firstObject] : [versionParts lastObject]];
                     }
                     if ([item.versionModifier length] == 0) {
-                        [item setVersionModifier:[versionParts count] == 1 ? @" " : [versionParts firstObject]];
+                        [item setVersionModifier:[versionParts count] == 1 ? kVersionModeEmpty : [versionParts firstObject]];
                     }
                 }];
             }];
@@ -321,7 +360,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
                 [item setSummary:availableItem.summary];
                 [item setVersions:availableItem.versions];
                 if (![(PodItem*)item versionModifier]) {
-                    [item setVersionModifier:@"="];
+                    [item setVersionModifier:kVersionModeEquals];
                 }
             }
         }];
@@ -331,36 +370,37 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 - (void)loadAvailablePods
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *localRepoPath = [NSHomeDirectory() stringByAppendingPathComponent:@".cocoapods/repos/master"];
+    NSString *localRepoPath = [NSHomeDirectory() stringByAppendingPathComponent:@".cocoapods/repos/master/Specs"];
     NSError *error = nil;
     NSArray *localRepoContent = [fileManager contentsOfDirectoryAtPath:localRepoPath error:&error];
     NSMutableArray *repos = [NSMutableArray array];
+    __weak typeof(self) weakSelf = self;
+    [self.repoReadProgressBar setMaxValue:[localRepoContent count]];
     [localRepoContent enumerateObjectsUsingBlock:^(NSString *podName, NSUInteger idx, BOOL *stop) {
-        NSError *internalError = nil;
         if (![podName hasPrefix:@"."]) {
+            NSError *internalError = nil;
             NSString *podRepoPath = [localRepoPath stringByAppendingPathComponent:podName];
             NSArray *podVersions = [[fileManager contentsOfDirectoryAtPath:podRepoPath error:&internalError] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
             NSString *maxVersion = [podVersions lastObject];
-            NSString *podspecPath = [[podRepoPath stringByAppendingPathComponent:maxVersion] stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.podspec", podName]];
-            BOOL isDir;
-            BOOL exists = [fileManager fileExistsAtPath:podspecPath isDirectory:&isDir];
-            if (exists && !isDir) {
-                NSData *podspecData = [NSData dataWithContentsOfFile:podspecPath];
-                PodItem *item = [[PodItem alloc] init];
-                [item setRepoPath:podspecPath];
-                [item setPodspecData:podspecData];
-                [item setVersions:podVersions];
-                [item setName:podName];
-                [item setVersionModifier:@"="];
-                [repos addObject:item];
+            NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[podRepoPath stringByAppendingPathComponent:maxVersion] error:&internalError];
+            if (!internalError) {
+                NSString *fileName = [[files filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF BEGINSWITH %@", podName]] firstObject];
+                if ([fileName length] > 0) {
+                    NSString *fullPath = [[podRepoPath stringByAppendingPathComponent:maxVersion] stringByAppendingPathComponent:fileName];
+                    PodItem *item = [[PodItem alloc] initWithPath:fullPath];
+                    [item setVersions:podVersions];
+                    [repos addObject:item];
+                }
             }
         }
+        [weakSelf.repoReadProgressBar setDoubleValue:idx];
     }];
     [self performSelectorOnMainThread:@selector(updateAvailableContent:) withObject:repos waitUntilDone:YES];
 }
 
 - (void)updateAvailableContent:(NSArray*)content
 {
+    [self.repoReadProgressBar setHidden:YES];
     [self willChangeValueForKey:@"availablePods"];
     [self setAvailablePods:[NSArray arrayWithArray:content]];
     [[NSNotificationCenter defaultCenter] postNotificationName:kReposDidRead object:nil];
@@ -370,7 +410,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 #pragma mark
 #pragma mark Pod gem task exeptions handling
 
-- (void)podGemTaskExeption:(NSException*)exception wrongPath:(NSString*)launchPath task:(PodTaskName)task
+- (void)podGemTaskExeption:(NSException*)exception wrongPath:(NSString*)launchPath task:(PodTask)task
 {
 //    NSLog(@"CocoaPodUI::%s ~ Exception Handling", __PRETTY_FUNCTION__);
     
@@ -416,7 +456,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
             if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
                 [[NSUserDefaults standardUserDefaults] setValue:[path copy] forKey:kPodGemPathKey];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                PodTaskName task = [(__bridge NSNumber*)(contextInfo) unsignedIntegerValue];
+                PodTask task = [(__bridge NSNumber*)(contextInfo) unsignedIntegerValue];
                 if (task == kReadPodfileTaskName) {
                     [self loadPodsWithPath:self.path];
                 }
@@ -509,8 +549,11 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 
 - (void)modalOverlayDidShow:(NSNotification *)notification
 {
+//    NSLog(@"%@", [notification object]);
+    PodTask task = [[notification object] task];
+    NSLog(@"COCOAPODUI::TASK::%@", task == kUpdateTaskName ? @"Update" : @"Install");
     __weak typeof(self) weakSelf = self;
-    [self installTask:^(BOOL success, NSError *error) {
+    [self installTask:task completion:^(BOOL success, NSError *error) {
         
         //        NSLog(@"INSTALL COMPLETE. Succeded = %hhd, Changed = %d", success, !success);
         [weakSelf setInstallationSucceded:success];
@@ -525,10 +568,10 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 
 - (void)modalOverlayDidClose:(NSNotification *)notification
 {
-    //    NSLog(@"NeedReopen Flag = %hhd && InstallSucceded Flag = %d", self.needReopenWorkspace, self.installationSucceded);
+    NSLog(@"COCOAPODUI::InstallFinished");
     [self setChanged:!self.installationSucceded];
     if (self.needReopenWorkspace && self.installationSucceded) {
-        //        NSLog(@"NEED REOPEN");
+        NSLog(@"COCOAPODUI::NowReopen");
         [self reopenProject:XCodeWorkspace];
     }
     else if (!self.installationSucceded) {
@@ -578,10 +621,12 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 #pragma mark
 #pragma mark Service
 
-- (void)installTask:(void(^)(BOOL, NSError*))success
+- (void)installTask:(PodTask)type completion:(void(^)(BOOL, NSError*))success
 {
+    NSParameterAssert((type == kUpdateTaskName)||(type == kInstallTaskName));
+    
     NSTask *installTask = [[NSTask alloc] init];
-    NSArray *args = @[@"install", @"--no-color"];
+    NSArray *args = type == kInstallTaskName ? @[@"install"] : @[@"update"];
     NSString *launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
     [installTask setLaunchPath:launchPath];
     [installTask setCurrentDirectoryPath:[self.path stringByDeletingLastPathComponent]];
@@ -594,7 +639,6 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
     __block NSError *error = nil;
     __block BOOL successFlag = YES;
     id logView = self.enableConsoleOutput ? [self logView:nil] : nil;
-//    NSLog(@"%@", logView);
     [output setReadabilityHandler:^(NSFileHandle *fileHandler) {
         NSData *data = [fileHandler availableData]; // this will read to EOF, so call only once
         NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
@@ -665,7 +709,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
             PodItem *item = obj;
             NSMutableString *podString = [NSMutableString stringWithFormat:@"%@pod '%@'", idx == 0 ? @"" : @"\n", item.name];
             NSString *vMod = item.versionModifier;
-            ([vMod length] == 0 || [vMod isEqualToString:@"="] || [vMod isEqualToString:@" "]) ? [podString appendFormat:@", '%@'", item.version] : [podString appendFormat:@", '%@ %@'", vMod, item.version];
+            (([vMod length] == 0) || [vMod isEqualToString:kVersionModeEquals] || [vMod isEqualToString:kVersionModeEmpty]) ? [podString appendFormat:@", '%@'", item.version] : [podString appendFormat:@", '%@ %@'", vMod, item.version];
             NSString *git = [[item gitURL] absoluteString];
             if (git) {
                 [podString appendFormat:@", :git => '%@'", git];
@@ -725,7 +769,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 - (NSArray *)platformVersions
 {
     if ([self.platformName isEqualToString:@"iOS"]) {
-        return @[@"4.3", @"5.0", @"6.0", @"7.0"];
+        return @[@"4.3", @"5.0", @"5.1", @"6.0", @"6.1", @"7.0", @"7.1"];
     }
     else {
         return @[@"10.5", @"10.6", @"10.7", @"10.8", @"10.9"];
@@ -743,11 +787,11 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
             id workspaceDocument = [[controller valueForKey:@"window"] document];
             [workspaceDocument performSelectorOnMainThread:@selector(close) withObject:nil waitUntilDone:YES];
             NSString *projectFolderPath = [weakSelf.path stringByDeletingLastPathComponent];
-            NSString *projectName = [projectFolderPath lastPathComponent];
+            NSString *projectName = [(MainWindowController*)[[weakSelf.view window] windowController] projectName];
             NSString *extension = type == XCodeProject ? @"xcodeproj" : @"xcworkspace";
             NSString *workspaceFilePath = [projectFolderPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", projectName, extension]];
             BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:workspaceFilePath];
-            //            NSLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
+            NSLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
             if (fileExists) {
                 NSTask *openTask = [[NSTask alloc] init];
                 NSArray *args = @[workspaceFilePath];
@@ -756,6 +800,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
                 [openTask launch];
             }
             else {
+                NSLog(@"COCOAPODUI::START_TIMER");
                 NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:.5 target:weakSelf selector:@selector(checkIfWorkspaceCreated:) userInfo:@{@"path":workspaceFilePath} repeats:YES];
 #pragma unused (timer)
             }
@@ -834,7 +879,9 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 {
     if ([self savePodfile]) {
         if (![self.overlay isShown]) {
+            [self.overlayController.taskLable setStringValue:@"Installing selected Pods..."];
             [self.overlayController animateProgress:YES];
+            [self.overlay setTask:kInstallTaskName];
             [self.overlay showInWindow:[[self view] window]];
         }
     }
@@ -970,7 +1017,7 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
 {
     NSAlert *addTargetAlert = [[NSAlert alloc] init];
     [addTargetAlert setAlertStyle:NSInformationalAlertStyle];
-    NSString *projectName = [[self.path stringByDeletingLastPathComponent] lastPathComponent];
+    NSString *projectName = [[[self.view window] windowController] projectName];
     [addTargetAlert setMessageText:[NSString stringWithFormat:@"Add new target to project \"%@\"", projectName]];
     [addTargetAlert setInformativeText:[NSString stringWithFormat:@"Define name for new target of project \"%@\"", projectName]];
     
@@ -1002,6 +1049,101 @@ typedef NS_ENUM(NSUInteger, PodTaskName) {
         }
     }];
 }
+
+- (IBAction)switchOutdatedCheck:(id)sender
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    id savedNeedShow = [defaults valueForKey:kNeedShowOutdatedPodsCount];
+    if (!savedNeedShow && !self.needOutdatedCounter) {
+        [self setNeedOutdatedCounter:self.needCheckOutdated];
+    }
+    [defaults setBool:self.needCheckOutdated forKey:kNeedCheckOutdatedPods];
+    [defaults setBool:self.needOutdatedCounter forKey:kNeedShowOutdatedPodsCount];
+    [defaults synchronize];
+    
+    if (self.needCheckOutdated) {
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSTask *outdatedTask = [[NSTask alloc] init];
+            NSString *launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
+            [outdatedTask setLaunchPath:launchPath];
+            [outdatedTask setArguments:@[@"outdated"]];
+            NSString *dirPath = [weakSelf.path stringByDeletingLastPathComponent];
+            [outdatedTask setCurrentDirectoryPath:dirPath];
+           
+            NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+            environment[@"LC_ALL"]=@"en_US.UTF-8";
+            [outdatedTask setEnvironment:environment];
+            
+            NSPipe *pipeOut = [NSPipe pipe];
+            [outdatedTask setStandardOutput:pipeOut];
+            NSFileHandle *output = [pipeOut fileHandleForReading];
+            
+            __block NSUInteger outdatedCounter = 0;
+            [output setReadabilityHandler:^(NSFileHandle *fh) {
+                NSData *data = [fh availableData];
+                NSError *error = nil;
+                NSDictionary *info = [YAMLSerialization objectWithYAMLData:data options:kYAMLReadOptionStringScalars error:&error];
+                if ([info isKindOfClass:[NSDictionary class]]) {
+                    NSArray *items = [[info allValues] firstObject];
+                    [items enumerateObjectsUsingBlock:^(NSString *obj, NSUInteger idx, BOOL *stop) {
+                        NSRange whitespaceRange = [obj rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+                        if (whitespaceRange.location != NSNotFound) {
+                            NSString *availableName = [obj substringToIndex:whitespaceRange.location];
+                            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.name BEGINSWITH %@", availableName];
+                            PodItem *item = [[weakSelf.installedPods filteredArrayUsingPredicate:predicate] firstObject];
+                            if (item) {
+                                [item setOutdated:YES];
+                                [weakSelf setHasOutdated:YES];
+                                outdatedCounter++;
+                            }
+                        }
+                    }];
+                }
+            }];
+            
+            [outdatedTask setTerminationHandler:^(NSTask *t) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [weakSelf.installedTable reloadData];
+                    [weakSelf.updateButton setEnabled:(outdatedCounter > 0)];
+                    if (weakSelf.needOutdatedCounter) {
+                        NSString *title = [[NSApp mainWindow] title];
+                        NSUInteger whitespace = [title rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location;
+                        if (whitespace != NSNotFound) {
+                            NSString *key = [title substringToIndex:whitespace];
+                            [weakSelf.outdatedSheet setValue:@(outdatedCounter) forKey:key];
+                            [[NSApp dockTile] setBadgeLabel: outdatedCounter > 0 ? [NSString stringWithFormat:@"%lu", (unsigned long)outdatedCounter] : nil];
+                        }
+                    }
+                });
+            }];
+            
+            [outdatedTask launch];
+        });
+    }
+}
+
+- (IBAction)switchOutdatedBadge:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:self.needOutdatedCounter forKey:kNeedShowOutdatedPodsCount];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    NSArray *outdated = [self.installedPods filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.outdated == 1"]];
+    [[NSApp dockTile] setBadgeLabel: [sender state] > 0 ? [NSString stringWithFormat:@"%lu", (unsigned long)[outdated count]] : nil];
+}
+
+- (IBAction)updatePods:(id)sender
+{
+    if (![self.overlay isShown]) {
+        [self.overlayController.taskLable setStringValue:@"Updating Pods..."];
+        [self.overlayController animateProgress:YES];
+        [self.overlay setTask:kUpdateTaskName];
+        [self.overlay showInWindow:[[self view] window]];
+    }
+}
+
+#pragma mark
+#pragma mark Text Delegate
 
 - (void)controlTextDidChange:(NSNotification *)obj
 {

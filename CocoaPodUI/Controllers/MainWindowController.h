@@ -29,4 +29,5 @@
 
 @interface MainWindowController : NSWindowController
 - (void)updateInfo;
+@property (readonly) NSString *projectName;
 @end

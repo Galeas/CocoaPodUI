@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13C1021" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment version="1070" defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
@@ -9,6 +9,8 @@
             <connections>
                 <outlet property="availableTable" destination="S9E-vT-gHo" id="1JM-Qa-zeV"/>
                 <outlet property="installedTable" destination="eCO-Lk-Fnc" id="OtI-zV-MsU"/>
+                <outlet property="repoReadProgressBar" destination="ZWN-0B-ti9" id="aM8-CP-3fw"/>
+                <outlet property="updateButton" destination="28U-LO-Cdg" id="pVm-wT-5wS"/>
                 <outlet property="view" destination="1" id="2"/>
             </connections>
         </customObject>
@@ -57,6 +59,22 @@
                                                                 <rect key="frame" x="1" y="1" width="305" height="72"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
+                                                                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="NUg-dV-ilK">
+                                                                        <rect key="frame" x="55" y="0.0" width="196" height="72"/>
+                                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="72" id="VVX-1L-Lcv"/>
+                                                                            <constraint firstAttribute="width" constant="196" id="deM-0x-WsK"/>
+                                                                        </constraints>
+                                                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="outdated" id="zlU-Sx-dwM"/>
+                                                                        <connections>
+                                                                            <binding destination="PgK-12-CAv" name="hidden" keyPath="objectValue.outdated" id="yyI-vL-Ma3">
+                                                                                <dictionary key="options">
+                                                                                    <string key="NSValueTransformerName">NSNegateBoolean</string>
+                                                                                </dictionary>
+                                                                            </binding>
+                                                                        </connections>
+                                                                    </imageView>
                                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Ovh-eK-gIH">
                                                                         <rect key="frame" x="3" y="42" width="30" height="25"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
@@ -159,8 +177,10 @@
                                                                     <constraint firstItem="WoI-BE-FPy" firstAttribute="leading" secondItem="cFX-tF-Wo5" secondAttribute="trailing" constant="8" id="EFy-MR-FFQ"/>
                                                                     <constraint firstItem="WoI-BE-FPy" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="8" id="OaM-O8-JDm"/>
                                                                     <constraint firstItem="Ovh-eK-gIH" firstAttribute="leading" secondItem="PgK-12-CAv" secondAttribute="leading" constant="5" id="P9s-Mn-bFP"/>
+                                                                    <constraint firstAttribute="centerX" secondItem="NUg-dV-ilK" secondAttribute="centerX" id="R4A-Ka-cZL"/>
                                                                     <constraint firstItem="imR-2c-0l4" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="5" id="Rf8-2w-dXb"/>
                                                                     <constraint firstItem="Ovh-eK-gIH" firstAttribute="top" secondItem="PgK-12-CAv" secondAttribute="top" constant="5" id="XfI-X6-DXz"/>
+                                                                    <constraint firstAttribute="centerY" secondItem="NUg-dV-ilK" secondAttribute="centerY" id="cD3-HF-URV"/>
                                                                     <constraint firstItem="imR-2c-0l4" firstAttribute="leading" secondItem="Ovh-eK-gIH" secondAttribute="trailing" constant="8" id="fiK-rw-BWz"/>
                                                                     <constraint firstAttribute="trailing" secondItem="jVj-Rs-eQj" secondAttribute="trailing" constant="12" id="kJk-X9-ceM"/>
                                                                     <constraint firstItem="jVj-Rs-eQj" firstAttribute="leading" secondItem="PgK-12-CAv" secondAttribute="leading" constant="5" id="zG8-l6-nXI"/>
@@ -516,6 +536,11 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     </searchFieldCell>
                                     <connections>
+                                        <binding destination="-2" name="hidden" keyPath="availablePods" id="43h-IV-xua">
+                                            <dictionary key="options">
+                                                <string key="NSValueTransformerName">NSIsNil</string>
+                                            </dictionary>
+                                        </binding>
                                         <binding destination="IcY-LW-nC8" name="predicate" keyPath="filterPredicate" id="gyf-sf-JT3">
                                             <dictionary key="options">
                                                 <string key="NSDisplayName">predicate</string>
@@ -524,10 +549,20 @@
                                         </binding>
                                     </connections>
                                 </searchField>
+                                <progressIndicator maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="ZWN-0B-ti9">
+                                    <rect key="frame" x="4" y="327" width="299" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="18" id="ilr-Ra-l9S"/>
+                                    </constraints>
+                                </progressIndicator>
                             </subviews>
                             <constraints>
                                 <constraint firstAttribute="trailing" secondItem="5It-ay-SXb" secondAttribute="trailing" constant="4" id="6LZ-tP-t9J"/>
                                 <constraint firstAttribute="centerY" secondItem="1eh-n7-GDx" secondAttribute="centerY" id="GiV-Dn-1g5"/>
+                                <constraint firstItem="ZWN-0B-ti9" firstAttribute="top" secondItem="6hu-Et-oq7" secondAttribute="top" constant="13" id="ILR-RG-Xl7"/>
+                                <constraint firstItem="ZWN-0B-ti9" firstAttribute="leading" secondItem="6hu-Et-oq7" secondAttribute="leading" constant="4" id="IfY-Jt-r2O"/>
+                                <constraint firstAttribute="trailing" secondItem="ZWN-0B-ti9" secondAttribute="trailing" constant="4" id="JKC-Zh-zE6"/>
                                 <constraint firstItem="wTx-mS-MXy" firstAttribute="top" secondItem="6hu-Et-oq7" secondAttribute="top" constant="41" id="LuQ-fI-dqk"/>
                                 <constraint firstItem="5It-ay-SXb" firstAttribute="leading" secondItem="6hu-Et-oq7" secondAttribute="leading" id="TKS-bs-LVE"/>
                                 <constraint firstItem="wTx-mS-MXy" firstAttribute="leading" secondItem="6hu-Et-oq7" secondAttribute="leading" id="glL-hl-lzT"/>
@@ -579,10 +614,10 @@
                     </connections>
                 </button>
                 <button translatesAutoresizingMaskIntoConstraints="NO" id="hoE-QI-0yT">
-                    <rect key="frame" x="17" y="28" width="243" height="20"/>
+                    <rect key="frame" x="17" y="28" width="209" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="238" id="G1y-pa-aWs"/>
+                        <constraint firstAttribute="width" constant="204" id="G1y-pa-aWs"/>
                         <constraint firstAttribute="height" constant="14" id="dbI-Gf-dzt"/>
                     </constraints>
                     <buttonCell key="cell" type="check" title="Reopen project on task completion" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="htb-q9-nD3">
@@ -608,6 +643,83 @@
                         <binding destination="-2" name="value" keyPath="self.enableConsoleOutput" id="WZ0-54-waJ"/>
                     </connections>
                 </button>
+                <box autoresizesSubviews="NO" horizontalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="C2k-6c-Auy">
+                    <rect key="frame" x="9" y="11" width="5" height="34"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="1" id="lJm-hO-aDS"/>
+                        <constraint firstAttribute="height" constant="34" id="uPU-9r-uPc"/>
+                    </constraints>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <font key="titleFont" metaFont="system"/>
+                </box>
+                <box autoresizesSubviews="NO" horizontalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="ODu-Wr-XJU">
+                    <rect key="frame" x="230" y="11" width="5" height="34"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="34" id="4XD-b2-FhO"/>
+                        <constraint firstAttribute="width" constant="1" id="nV0-f0-tEv"/>
+                    </constraints>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <font key="titleFont" metaFont="system"/>
+                </box>
+                <box autoresizesSubviews="NO" horizontalHuggingPriority="750" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="UGr-5b-UQM">
+                    <rect key="frame" x="456" y="11" width="4" height="34"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="width" id="oFp-bA-oJv"/>
+                        <constraint firstAttribute="height" constant="34" id="qeQ-A1-XzZ"/>
+                    </constraints>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <font key="titleFont" metaFont="system"/>
+                </box>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="5yi-ka-8Ux">
+                    <rect key="frame" x="237" y="28" width="153" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="148" id="Btf-2j-Cpe"/>
+                        <constraint firstAttribute="height" constant="14" id="kT5-Hg-qi6"/>
+                    </constraints>
+                    <buttonCell key="cell" type="check" title="Check for outdated Pods" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="APc-SW-80P">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="smallSystem"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="switchOutdatedCheck:" target="-2" id="5G8-oG-sRR"/>
+                        <binding destination="-2" name="value" keyPath="self.needCheckOutdated" id="MoL-tz-bSx"/>
+                    </connections>
+                </button>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="dcQ-5q-p4i">
+                    <rect key="frame" x="238" y="8" width="214" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="209" id="l1R-Q0-PF3"/>
+                        <constraint firstAttribute="height" constant="14" id="lMX-nZ-OrG"/>
+                    </constraints>
+                    <buttonCell key="cell" type="check" title="Show outdated count on Xcode icon" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="03y-nO-nHK">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="smallSystem"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="switchOutdatedBadge:" target="-2" id="aCA-Xm-TCf"/>
+                        <binding destination="-2" name="enabled" keyPath="self.needCheckOutdated" id="ne6-Ly-M24"/>
+                        <binding destination="-2" name="value" keyPath="self.needOutdatedCounter" id="lrd-X9-4XK"/>
+                    </connections>
+                </button>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28U-LO-Cdg">
+                    <rect key="frame" x="395" y="30" width="56" height="16"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" title="Update" bezelStyle="rounded" alignment="center" controlSize="mini" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kRI-eQ-wMP">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="miniSystem"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="updatePods:" target="-2" id="7ge-AL-W7j"/>
+                    </connections>
+                </button>
             </subviews>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="RD9-4T-Q8h" secondAttribute="bottom" constant="11" id="2tk-KQ-Rr3"/>
@@ -615,13 +727,23 @@
                 <constraint firstAttribute="bottom" secondItem="JGT-IZ-jGS" secondAttribute="bottom" constant="20" id="3ca-hJ-Loz"/>
                 <constraint firstItem="hoE-QI-0yT" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" id="3mK-rY-zzc"/>
                 <constraint firstAttribute="bottom" secondItem="hoE-QI-0yT" secondAttribute="bottom" constant="31" id="6co-b0-OXF"/>
+                <constraint firstItem="5yi-ka-8Ux" firstAttribute="leading" secondItem="ODu-Wr-XJU" secondAttribute="trailing" constant="7" id="7dX-9a-avR"/>
+                <constraint firstItem="dcQ-5q-p4i" firstAttribute="leading" secondItem="ODu-Wr-XJU" secondAttribute="trailing" constant="8" id="7ei-P8-lL8"/>
+                <constraint firstAttribute="bottom" secondItem="C2k-6c-Auy" secondAttribute="bottom" constant="11" id="GFL-l6-qqg"/>
+                <constraint firstAttribute="bottom" secondItem="UGr-5b-UQM" secondAttribute="bottom" constant="11" id="Mli-aq-loO"/>
                 <constraint firstItem="tYU-yx-pAJ" firstAttribute="top" secondItem="1" secondAttribute="top" id="evR-2d-24g"/>
                 <constraint firstAttribute="bottom" secondItem="tYU-yx-pAJ" secondAttribute="bottom" constant="61" id="fjC-aj-oQE"/>
                 <constraint firstAttribute="bottom" secondItem="y1C-Fq-rQo" secondAttribute="bottom" constant="20" id="g8p-gR-4Sd"/>
+                <constraint firstItem="UGr-5b-UQM" firstAttribute="leading" secondItem="dcQ-5q-p4i" secondAttribute="trailing" constant="8" id="gta-2z-kCG"/>
+                <constraint firstItem="ODu-Wr-XJU" firstAttribute="leading" secondItem="hoE-QI-0yT" secondAttribute="trailing" constant="8" id="hYS-s2-zdn"/>
                 <constraint firstAttribute="trailing" secondItem="tYU-yx-pAJ" secondAttribute="trailing" id="kZL-io-eB7"/>
+                <constraint firstAttribute="bottom" secondItem="ODu-Wr-XJU" secondAttribute="bottom" constant="11" id="lBL-tq-tIZ"/>
+                <constraint firstAttribute="bottom" secondItem="5yi-ka-8Ux" secondAttribute="bottom" constant="31" id="mus-uO-kh0"/>
+                <constraint firstAttribute="bottom" secondItem="dcQ-5q-p4i" secondAttribute="bottom" constant="11" id="r4L-6O-1YU"/>
                 <constraint firstItem="y1C-Fq-rQo" firstAttribute="leading" secondItem="JGT-IZ-jGS" secondAttribute="trailing" constant="12" id="reB-f8-pJv"/>
                 <constraint firstItem="tYU-yx-pAJ" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="x2k-ya-YPW"/>
                 <constraint firstItem="RD9-4T-Q8h" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="20" id="y4r-LU-uDs"/>
+                <constraint firstItem="C2k-6c-Auy" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="11" id="ytz-nP-57I"/>
             </constraints>
         </customView>
         <arrayController objectClassName="PodItem" editable="NO" id="IcY-LW-nC8" userLabel="Available">
@@ -639,6 +761,7 @@
     <resources>
         <image name="edit" width="25.600000381469727" height="25.600000381469727"/>
         <image name="minus" width="16" height="16"/>
+        <image name="outdated" width="141.1199951171875" height="51.840000152587891"/>
         <image name="plus" width="16" height="16"/>
         <image name="target" width="24" height="24"/>
         <image name="target_minus" width="24" height="24"/>

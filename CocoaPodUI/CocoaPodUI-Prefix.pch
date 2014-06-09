@@ -10,4 +10,6 @@
 #define RGB(r, g, b)                        [NSColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
 #define RGBA(r, g, b, a)                    [NSColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
 static NSString *const kPodGemPathKey = @"CocoaPodUI:GemPathKey";
+static NSString *const kNeedCheckOutdatedPods = @"CocoaPodUI:NeedCheckOutdatedPods";
+static NSString *const kNeedShowOutdatedPodsCount = @"CocoaPodUI:NeedShowOutdatedPodsCount";
 #endif
