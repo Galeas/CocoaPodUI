@@ -122,7 +122,7 @@
 		EB2B592D124E2117001FFEEB /* events.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = events.c; sourceTree = "<group>"; };
 		EB6C3FB9124D872600886AD1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		EB6C420E124D99BE00886AD1 /* test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB6C4226124D9A1700886AD1 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
+		EB6C4226124D9A1700886AD1 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = test.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		EB6C424F124D9B3E00886AD1 /* yaml */ = {isa = PBXFileReference; lastKnownFileType = folder; path = yaml; sourceTree = "<group>"; };
 		EB8C1AAF14B795CC00BCDC1A /* yaml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = yaml.h; path = "yaml-0.1.4/include/yaml.h"; sourceTree = "<group>"; };
 		EB8C1AB114B795E200BCDC1A /* api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = api.c; path = "yaml-0.1.4/src/api.c"; sourceTree = "<group>"; };
@@ -363,7 +363,7 @@
 			name = YAMLUnitTests;
 			productName = YAMLUnitTests;
 			productReference = D319EEA613E5EE2A000EB46D /* YAMLUnitTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productType = "com.apple.product-type.bundle.ocunit-test";
 		};
 		EB2B5927124E2100001FFEEB /* events */ = {
 			isa = PBXNativeTarget;

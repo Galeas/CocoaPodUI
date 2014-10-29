@@ -85,7 +85,7 @@
 		6D280BAF190A8C0300220C9B /* AvailableTableDragDropSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvailableTableDragDropSource.h; path = Classes/AvailableTableDragDropSource.h; sourceTree = "<group>"; };
 		6D280BB0190A8C0300220C9B /* AvailableTableDragDropSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AvailableTableDragDropSource.m; path = Classes/AvailableTableDragDropSource.m; sourceTree = "<group>"; };
 		6D679C4618C2694F00B177EB /* PodsManagementViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodsManagementViewController.h; path = Controllers/PodsManagementViewController.h; sourceTree = "<group>"; };
-		6D679C4718C2694F00B177EB /* PodsManagementViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodsManagementViewController.m; path = Controllers/PodsManagementViewController.m; sourceTree = "<group>"; };
+		6D679C4718C2694F00B177EB /* PodsManagementViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PodsManagementViewController.m; path = Controllers/PodsManagementViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodsManagementViewController.xib; path = Controllers/PodsManagementViewController.xib; sourceTree = "<group>"; };
 		6D74161218ED42F6002F111A /* NSString+Extra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Extra.h"; path = "Categories/NSString+Extra.h"; sourceTree = "<group>"; };
 		6D74161318ED42F6002F111A /* NSString+Extra.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Extra.m"; path = "Categories/NSString+Extra.m"; sourceTree = "<group>"; };
@@ -99,16 +99,16 @@
 		6DCB578A18C21FAE00AA37E2 /* CreatePodController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CreatePodController.xib; path = Controllers/CreatePodController.xib; sourceTree = "<group>"; };
 		6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YAML.xcodeproj; path = "YAML.framework-master/YAML.xcodeproj"; sourceTree = "<group>"; };
 		D612005C18D9FE28006FC060 /* PodEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodEditController.h; path = Controllers/PodEditController.h; sourceTree = "<group>"; };
-		D612005D18D9FE28006FC060 /* PodEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodEditController.m; path = Controllers/PodEditController.m; sourceTree = "<group>"; };
+		D612005D18D9FE28006FC060 /* PodEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PodEditController.m; path = Controllers/PodEditController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D612005E18D9FE28006FC060 /* PodEditController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodEditController.xib; path = Controllers/PodEditController.xib; sourceTree = "<group>"; };
 		D617AB3D18BF57E300BAA982 /* MainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainWindowController.h; path = Controllers/MainWindowController.h; sourceTree = "<group>"; };
-		D617AB3E18BF57E300BAA982 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MainWindowController.m; path = Controllers/MainWindowController.m; sourceTree = "<group>"; };
+		D617AB3E18BF57E300BAA982 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MainWindowController.m; path = Controllers/MainWindowController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D617AB3F18BF57E300BAA982 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainWindowController.xib; path = Controllers/MainWindowController.xib; sourceTree = "<group>"; };
 		D63F589C18BF7EC2009811B8 /* NSObject+IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+IDEKit.h"; path = "Categories/NSObject+IDEKit.h"; sourceTree = "<group>"; };
 		D6435B8818C0953400138E05 /* PodCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodCell.h; path = Views/Cells/PodCell.h; sourceTree = "<group>"; };
 		D6435B8918C0953400138E05 /* PodCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodCell.m; path = Views/Cells/PodCell.m; sourceTree = "<group>"; };
 		D6544ADA18BF8A19004B595B /* PodItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodItem.h; path = Classes/PodItem.h; sourceTree = "<group>"; };
-		D6544ADB18BF8A19004B595B /* PodItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodItem.m; path = Classes/PodItem.m; sourceTree = "<group>"; };
+		D6544ADB18BF8A19004B595B /* PodItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PodItem.m; path = Classes/PodItem.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D67E063118C60DFC00200343 /* JMModalOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JMModalOverlay.h; sourceTree = "<group>"; };
 		D67E063218C60DFC00200343 /* JMModalOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JMModalOverlay.m; sourceTree = "<group>"; };
 		D67E063318C60DFC00200343 /* JMModalOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JMModalOverlayView.h; sourceTree = "<group>"; };
@@ -127,9 +127,9 @@
 		D6FA49C618BF43750082B98D /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		D6FA49C918BF43750082B98D /* CocoaPodUI-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CocoaPodUI-Info.plist"; sourceTree = "<group>"; };
 		D6FA49CB18BF43750082B98D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		D6FA49CD18BF43750082B98D /* CocoaPodUI-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CocoaPodUI-Prefix.pch"; sourceTree = "<group>"; };
+		D6FA49CD18BF43750082B98D /* CocoaPodUI-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "CocoaPodUI-Prefix.pch"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D6FA49D318BF46E50082B98D /* CocoaPodUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaPodUI.h; sourceTree = "<group>"; };
-		D6FA49D418BF46E50082B98D /* CocoaPodUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CocoaPodUI.m; sourceTree = "<group>"; };
+		D6FA49D418BF46E50082B98D /* CocoaPodUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CocoaPodUI.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

@@ -48,7 +48,7 @@
             [_item removeObserver:self forKeyPath:@"version"];
         }
         @catch (NSException *exception) {
-            NSLog(@"%@", [exception reason]);
+            DLog(@"%@", [exception reason]);
         }
     }
     _item = item;
@@ -62,7 +62,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath isEqualToString:@"version"]) {
-//        NSLog(@"POD CHANGE VERSION %s", __PRETTY_FUNCTION__);
+//        DLog(@"POD CHANGE VERSION %s", __PRETTY_FUNCTION__);
         if ([self.delegate respondsToSelector:@selector(didCompletePodEdition:)]) {
             [self.delegate didCompletePodEdition:self.item];
         }

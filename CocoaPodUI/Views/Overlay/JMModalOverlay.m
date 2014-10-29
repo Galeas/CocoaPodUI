@@ -225,7 +225,7 @@ NSString * const JMModalOverlayDidCloseNotification = @"JMModalOverlayDidCloseNo
         
         // Make view visible
         // Attach to parent window and make the window modal
-        [_parentWindow addChildWindow:_modalWindow ordered:NSAboveTop];
+        [_parentWindow addChildWindow:_modalWindow ordered:NSWindowAbove];
         if(_animates){
             [NSAnimationContext beginGrouping];
             [[NSAnimationContext currentContext] setCompletionHandler:^{
@@ -235,12 +235,12 @@ NSString * const JMModalOverlayDidCloseNotification = @"JMModalOverlayDidCloseNo
             [_containerView setAnimations:@{@"subviews":[self.class _appearAnimationForDirection:self.animationDirection]}];
             [[_containerView animator] addSubview:self.contentViewController.view];
             
-            [[_modalWindow animator] setAlphaValue:1.f];
+            [[_modalWindow animator] setAlphaValue:1.0f];
             [NSAnimationContext endGrouping];
         }
         else{
             [_containerView addSubview:self.contentViewController.view];
-            [_modalWindow setAlphaValue:1.f];
+            [_modalWindow setAlphaValue:1.0f];
             [self _afterShow];
 
         }
@@ -251,7 +251,7 @@ NSString * const JMModalOverlayDidCloseNotification = @"JMModalOverlayDidCloseNo
 
 - (void) _afterShow{
     [[NSNotificationCenter defaultCenter] postNotificationName:JMModalOverlayDidShowNotification object:self];
-    [NSApp runModalForWindow:_modalWindow];
+    DLog(@"MODAL RESPONSE:%ld", (long)[NSApp runModalForWindow:_modalWindow]);
 }
 
 

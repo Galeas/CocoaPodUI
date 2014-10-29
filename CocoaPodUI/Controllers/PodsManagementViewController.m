@@ -196,7 +196,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     @try {
         launchPath = [[NSUserDefaults standardUserDefaults] valueForKey:kPodGemPathKey];
         args = @[@"ipc", @"podfile", path];
-//        NSLog(@"CocoaPodUI::%s ~ LaunchPath:%@", __PRETTY_FUNCTION__, launchPath);
+//        DLog(@"CocoaPodUI::%s ~ LaunchPath:%@", __PRETTY_FUNCTION__, launchPath);
 
         [podfileTask setLaunchPath:launchPath];
         [podfileTask setArguments:args];
@@ -204,11 +204,11 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         environment[@"LC_ALL"]=@"en_US.UTF-8";
         [podfileTask setEnvironment:environment];
 
-//        NSLog(@"CocoaPodUI::%s ~ Try to Launch", __PRETTY_FUNCTION__);
+//        DLog(@"CocoaPodUI::%s ~ Try to Launch", __PRETTY_FUNCTION__);
         [podfileTask launch];
     }
     @catch (NSException *exception) {
-//        NSLog(@"CocoaPodUI::%s ~ Exception Reason:%@", __PRETTY_FUNCTION__, exception.reason);
+//        DLog(@"CocoaPodUI::%s ~ Exception Reason:%@", __PRETTY_FUNCTION__, exception.reason);
         [self podGemTaskExeption:exception wrongPath:launchPath task:kReadPodfileTaskName];
         return;
     }
@@ -412,7 +412,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (void)podGemTaskExeption:(NSException*)exception wrongPath:(NSString*)launchPath task:(PodTask)task
 {
-//    NSLog(@"CocoaPodUI::%s ~ Exception Handling", __PRETTY_FUNCTION__);
+    DLog(@"CocoaPodUI::%s ~ Exception Handling", __PRETTY_FUNCTION__);
     
     NSString *reason = [exception reason];
     if ([reason isEqualToString:@"launch path not accessible"] || [reason isEqualToString:@"must provide a launch path"]) {
@@ -441,7 +441,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         [alert setInformativeText:[NSString stringWithFormat:@"CocoaPodUI can't find \"pod\" gem at default %@ folder. You can specify it's location manually", [launchPath stringByDeletingLastPathComponent]]];
         [alert setAlertStyle:NSCriticalAlertStyle];
         
-//        NSLog(@"CocoaPodUI::%s ~ Alert created", __PRETTY_FUNCTION__);
+        DLog(@"CocoaPodUI::%s ~ Alert created", __PRETTY_FUNCTION__);
         
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)([NSNumber numberWithUnsignedInteger:task])];
     }
@@ -549,33 +549,46 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 
 - (void)modalOverlayDidShow:(NSNotification *)notification
 {
-//    NSLog(@"%@", [notification object]);
+//    DLog(@"%@", [notification object]);
     PodTask task = [(JMModalOverlay*)[notification object] task];
-    NSLog(@"COCOAPODUI::TASK::%@", task == kUpdateTaskName ? @"Update" : @"Install");
+    DLog(@"COCOAPODUI::TASK::%@", task == kUpdateTaskName ? @"Update" : @"Install");
     __weak typeof(self) weakSelf = self;
     [self installTask:task completion:^(BOOL success, NSError *error) {
         
-        //        NSLog(@"INSTALL COMPLETE. Succeded = %hhd, Changed = %d", success, !success);
+        DLog(@"INSTALL COMPLETE. Succeded = %hhd, Changed = %d", success, !success);
         [weakSelf setInstallationSucceded:success];
         [weakSelf setInstallationError:error];
         
-        //        NSLog(@"NOW CLOSE OVERLAY");
-        [weakSelf.overlayController animateProgress:NO];
-        [weakSelf.overlay performSelectorOnMainThread:@selector(close) withObject:nil waitUntilDone:YES];
-        [weakSelf.overlayController performSelectorOnMainThread:@selector(setText:) withObject:@"" waitUntilDone:NO];
+        DLog(@"NOW CLOSE OVERLAY");
+        dispatch_async(dispatch_get_main_queue(), ^{
+            DLog(@"COCOAPODUI::OVERLAY_CONTROLLER:%@ ~~ OVERLAY:%@", weakSelf.overlayController, weakSelf.overlay);
+            [weakSelf.overlayController animateProgress:NO];
+            [weakSelf.overlay performClose:weakSelf];
+            [weakSelf.overlayController setText:@""];
+        });
     }];
+}
+
+- (BOOL)modalOverlayShouldClose:(JMModalOverlay *)modalOverlay
+{
+    return YES;
+}
+
+- (void)modalOverlayWillClose:(NSNotification *)notification
+{
+    DLog(@"COCOAPODUI::OVERLAY_WILL_CLOSE");
 }
 
 - (void)modalOverlayDidClose:(NSNotification *)notification
 {
-    NSLog(@"COCOAPODUI::InstallFinished");
+    DLog(@"COCOAPODUI::InstallFinished");
     [self setChanged:!self.installationSucceded];
     if (self.needReopenWorkspace && self.installationSucceded) {
-        NSLog(@"COCOAPODUI::NowReopen");
+        DLog(@"COCOAPODUI::NowReopen");
         [self reopenProject:XCodeWorkspace];
     }
     else if (!self.installationSucceded) {
-        //        NSLog(@"NEED REOPEN, BUT INSTALL UNSUCCESFULL");
+        DLog(@"NEED REOPEN, BUT INSTALL UNSUCCESFULL");
         NSAlert *alert = [[NSAlert alloc] init];
         NSString *text = [[_installationError userInfo] valueForKey:@"reason"];
         [alert setAlertStyle:NSCriticalAlertStyle];
@@ -642,7 +655,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     [output setReadabilityHandler:^(NSFileHandle *fileHandler) {
         NSData *data = [fileHandler availableData]; // this will read to EOF, so call only once
         NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-        if ([text rangeOfString:@"[!] From now on use"].location == NSNotFound) {
+        if ([text rangeOfString:@"[!] From now on use"].location == NSNotFound || [text rangeOfString:@"Integrating client project"].location == NSNotFound) {
             NSRange possibleErrorRange = [text rangeOfString:@"[!] "];
             if (possibleErrorRange.location != NSNotFound) {
                 error = [NSError errorWithDomain:@"error::CocoaPodUI" code:666 userInfo:@{@"reason":[text substringFromIndex:NSMaxRange(possibleErrorRange)]}];
@@ -669,7 +682,9 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     }];
     
     [installTask setTerminationHandler:^(NSTask *task) {
+        DLog(@"COCOAPODUI::INSTALLATION TERMINATION HANDLER");
         if (success != nil) {
+            DLog(@"COCOAPODUI::WILL_PERFORM_INSTALSUCCESS_BLOCK");
             success(successFlag, error);
         }
     }];
@@ -783,27 +798,34 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     __weak typeof(self) weakSelf = self;
     NSArray *workspaceWindowControllers = [NSClassFromString(@"IDEWorkspaceWindowController") workspaceWindowControllers];
     [workspaceWindowControllers enumerateObjectsUsingBlock:^(id controller, NSUInteger idx, BOOL *stop) {
+        DLog(@"COCOAPODUI::REOPEN %lu - %@", (unsigned long)idx, controller);
         if ([[controller valueForKey:@"window"] isMainWindow]) {
             id workspaceDocument = [[controller valueForKey:@"window"] document];
-            [workspaceDocument performSelectorOnMainThread:@selector(close) withObject:nil waitUntilDone:YES];
+            DLog(@"COCOAPODUI::REOPEN_DOCUMENT -- %@", workspaceDocument);
             NSString *projectFolderPath = [weakSelf.path stringByDeletingLastPathComponent];
             NSString *projectName = [(MainWindowController*)[[weakSelf.view window] windowController] projectName];
             NSString *extension = type == XCodeProject ? @"xcodeproj" : @"xcworkspace";
             NSString *workspaceFilePath = [projectFolderPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", projectName, extension]];
             BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:workspaceFilePath];
-            NSLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
-            if (fileExists) {
-                NSTask *openTask = [[NSTask alloc] init];
-                NSArray *args = @[workspaceFilePath];
-                [openTask setLaunchPath:@"/usr/bin/open"];
-                [openTask setArguments:args];
-                [openTask launch];
-            }
-            else {
-                NSLog(@"COCOAPODUI::START_TIMER");
-                NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:.5 target:weakSelf selector:@selector(checkIfWorkspaceCreated:) userInfo:@{@"path":workspaceFilePath} repeats:YES];
+            DLog(@"INSTALL TO %@\nFILE EXIST = %d", workspaceFilePath,fileExists);
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [workspaceDocument close];
+                if (fileExists) {
+                    NSTask *openTask = [[NSTask alloc] init];
+                    NSArray *args = @[workspaceFilePath];
+                    [openTask setLaunchPath:@"/usr/bin/open"];
+                    [openTask setArguments:args];
+                    DLog(@"%@", openTask);
+                    [openTask launch];
+                }
+                else {
+                    DLog(@"COCOAPODUI::START_TIMER");
+                    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:.5 target:weakSelf selector:@selector(checkIfWorkspaceCreated:) userInfo:@{@"path":workspaceFilePath} repeats:YES];
 #pragma unused (timer)
-            }
+                }
+            });
+            
             *stop = YES;
         }
     }];
@@ -890,7 +912,7 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 - (BOOL)savePodfile
 {
     NSString *podfileString = [self podfileString];
-//    NSLog(@"PODFILE::%@", podfileString);
+//    DLog(@"PODFILE::%@", podfileString);
     NSError *error = nil;
     [[NSFileManager defaultManager] removeItemAtPath:self.path error:&error];
     BOOL saveSuccess = [podfileString writeToFile:self.path atomically:YES encoding:NSUTF8StringEncoding error:&error];

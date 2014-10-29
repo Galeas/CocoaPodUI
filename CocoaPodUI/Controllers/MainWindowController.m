@@ -68,7 +68,7 @@
             id workspace = [controller valueForKey:@"_workspace"];
             NSString *filePath = [[workspace valueForKey:@"representingFilePath"] valueForKey:@"pathString"];
             NSString *projectName = [[filePath lastPathComponent] stringByDeletingPathExtension];
-            NSLog(@"CocoaPodUI::ProjectName::%@", projectName);
+            DLog(@"CocoaPodUI::ProjectName::%@", projectName);
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (strongSelf) {
                 strongSelf->_projectName = projectName;

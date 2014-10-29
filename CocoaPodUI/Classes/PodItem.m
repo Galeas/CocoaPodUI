@@ -80,7 +80,7 @@ NSString *const kEditPodNotificationName = @"CocoaPodUI:EditPodAction";
         _summary = [summaryString stringByTrimmingCharactersInSet:restrictedSet];
     }
     @catch (NSException *exception) {
-        NSLog(@"%@", self.repoPath);
+        DLog(@"%@", self.repoPath);
     }
 }
 

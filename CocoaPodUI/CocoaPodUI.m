@@ -116,8 +116,11 @@
         MainWindowController *controller = [[MainWindowController alloc] initWithWindowNibName:@"MainWindowController"];
         [self setWindowController:controller];
     }
-    [NSApp beginSheet:[self.windowController window] modalForWindow:[NSApp keyWindow] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
-    [self.windowController updateInfo];
+    DLog(@"COCOAPODUI::%@ ~ \n %@", self.windowController, [NSApp keyWindow]);
+    if ([NSApp keyWindow]) {
+        [NSApp beginSheet:[self.windowController window] modalForWindow:[NSApp keyWindow] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+        [self.windowController updateInfo];
+    }
 }
 
 @end

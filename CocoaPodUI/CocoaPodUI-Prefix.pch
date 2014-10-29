@@ -12,4 +12,13 @@
 static NSString *const kPodGemPathKey = @"CocoaPodUI:GemPathKey";
 static NSString *const kNeedCheckOutdatedPods = @"CocoaPodUI:NeedCheckOutdatedPods";
 static NSString *const kNeedShowOutdatedPodsCount = @"CocoaPodUI:NeedShowOutdatedPodsCount";
+
+//add -DDEBUG flag to c flags
+#ifdef DEBUG
+# define DLog(...) NSLog(__VA_ARGS__)
+#else
+# define DLog(...) /* */
+#endif
+#define ALog(...) NSLog(__VA_ARGS__)
+
 #endif
