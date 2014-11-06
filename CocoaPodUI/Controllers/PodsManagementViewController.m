@@ -784,10 +784,10 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
 - (NSArray *)platformVersions
 {
     if ([self.platformName isEqualToString:@"iOS"]) {
-        return @[@"4.3", @"5.0", @"5.1", @"6.0", @"6.1", @"7.0", @"7.1"];
+        return @[@"4.3", @"5.0", @"5.1", @"6.0", @"6.1", @"7.0", @"7.1", @"8.0", @"8.1"];
     }
     else {
-        return @[@"10.5", @"10.6", @"10.7", @"10.8", @"10.9"];
+        return @[@"10.5", @"10.6", @"10.7", @"10.8", @"10.9", @"10.10"];
     }
 }
 

@@ -671,8 +671,12 @@
                         <binding destination="-2" name="value" keyPath="self.needOutdatedCounter" id="lrd-X9-4XK"/>
                     </connections>
                 </button>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28U-LO-Cdg">
+                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="28U-LO-Cdg">
                     <rect key="frame" x="395" y="30" width="56" height="16"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="15" id="V1f-64-5Fi"/>
+                        <constraint firstAttribute="width" constant="54" id="gmm-lo-Upm"/>
+                    </constraints>
                     <buttonCell key="cell" type="push" title="Update" bezelStyle="rounded" alignment="center" controlSize="mini" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kRI-eQ-wMP">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="miniSystem"/>
@@ -700,6 +704,8 @@
                 <constraint firstAttribute="trailing" secondItem="tYU-yx-pAJ" secondAttribute="trailing" id="kZL-io-eB7"/>
                 <constraint firstAttribute="bottom" secondItem="ODu-Wr-XJU" secondAttribute="bottom" constant="11" id="lBL-tq-tIZ"/>
                 <constraint firstAttribute="bottom" secondItem="5yi-ka-8Ux" secondAttribute="bottom" constant="31" id="mus-uO-kh0"/>
+                <constraint firstAttribute="bottom" secondItem="28U-LO-Cdg" secondAttribute="bottom" constant="31" id="qVa-ZI-NKg"/>
+                <constraint firstItem="28U-LO-Cdg" firstAttribute="leading" secondItem="5yi-ka-8Ux" secondAttribute="trailing" constant="8" id="qos-Es-5II"/>
                 <constraint firstAttribute="bottom" secondItem="dcQ-5q-p4i" secondAttribute="bottom" constant="11" id="r4L-6O-1YU"/>
                 <constraint firstItem="y1C-Fq-rQo" firstAttribute="leading" secondItem="JGT-IZ-jGS" secondAttribute="trailing" constant="12" id="reB-f8-pJv"/>
                 <constraint firstItem="tYU-yx-pAJ" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="x2k-ya-YPW"/>

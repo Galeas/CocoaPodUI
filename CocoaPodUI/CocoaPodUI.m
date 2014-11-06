@@ -113,7 +113,10 @@
 - (void)showMessageBox:(id)origin
 {
     if (!self.windowController) {
-        MainWindowController *controller = [[MainWindowController alloc] initWithWindowNibName:@"MainWindowController"];
+        NSWindow *w = [[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+        MainWindowController *controller = [[MainWindowController alloc] initWithWindow:w];
+        DLog(@"COCOAPODUI::New window controller");
+//        MainWindowController *controller = [[MainWindowController alloc] initWithWindowNibName:@"MainWindowController"];
         [self setWindowController:controller];
     }
     DLog(@"COCOAPODUI::%@ ~ \n %@", self.windowController, [NSApp keyWindow]);
