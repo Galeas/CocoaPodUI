@@ -22,7 +22,6 @@
 		D612005F18D9FE28006FC060 /* PodEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = D612005D18D9FE28006FC060 /* PodEditController.m */; };
 		D612006018D9FE28006FC060 /* PodEditController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D612005E18D9FE28006FC060 /* PodEditController.xib */; };
 		D617AB4018BF57E300BAA982 /* MainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = D617AB3E18BF57E300BAA982 /* MainWindowController.m */; };
-		D617AB4118BF57E300BAA982 /* MainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D617AB3F18BF57E300BAA982 /* MainWindowController.xib */; };
 		D6435B8A18C0953400138E05 /* PodCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D6435B8918C0953400138E05 /* PodCell.m */; };
 		D6544ADC18BF8A19004B595B /* PodItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D6544ADB18BF8A19004B595B /* PodItem.m */; };
 		D67E063718C60DFC00200343 /* JMModalOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = D67E063218C60DFC00200343 /* JMModalOverlay.m */; };
@@ -103,7 +102,6 @@
 		D612005E18D9FE28006FC060 /* PodEditController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PodEditController.xib; path = Controllers/PodEditController.xib; sourceTree = "<group>"; };
 		D617AB3D18BF57E300BAA982 /* MainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainWindowController.h; path = Controllers/MainWindowController.h; sourceTree = "<group>"; };
 		D617AB3E18BF57E300BAA982 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MainWindowController.m; path = Controllers/MainWindowController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		D617AB3F18BF57E300BAA982 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainWindowController.xib; path = Controllers/MainWindowController.xib; sourceTree = "<group>"; };
 		D63F589C18BF7EC2009811B8 /* NSObject+IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+IDEKit.h"; path = "Categories/NSObject+IDEKit.h"; sourceTree = "<group>"; };
 		D6435B8818C0953400138E05 /* PodCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PodCell.h; path = Views/Cells/PodCell.h; sourceTree = "<group>"; };
 		D6435B8918C0953400138E05 /* PodCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PodCell.m; path = Views/Cells/PodCell.m; sourceTree = "<group>"; };
@@ -163,7 +161,6 @@
 			children = (
 				D617AB3D18BF57E300BAA982 /* MainWindowController.h */,
 				D617AB3E18BF57E300BAA982 /* MainWindowController.m */,
-				D617AB3F18BF57E300BAA982 /* MainWindowController.xib */,
 				6D679C4618C2694F00B177EB /* PodsManagementViewController.h */,
 				6D679C4718C2694F00B177EB /* PodsManagementViewController.m */,
 				6D679C4818C2694F00B177EB /* PodsManagementViewController.xib */,
@@ -403,7 +400,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D227A8B18C2264D000431E2 /* CreatePodController.xib in Resources */,
-				D617AB4118BF57E300BAA982 /* MainWindowController.xib in Resources */,
 				D67E064018C60F1E00200343 /* PodsOverlayController.xib in Resources */,
 				D6D1053918C0FC3600937033 /* Media.xcassets in Resources */,
 				D6FA49CC18BF43750082B98D /* InfoPlist.strings in Resources */,
