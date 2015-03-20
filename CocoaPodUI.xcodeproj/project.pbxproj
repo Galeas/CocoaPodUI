@@ -34,6 +34,7 @@
 		D6FA49C218BF43750082B98D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6FA49C118BF43750082B98D /* Cocoa.framework */; };
 		D6FA49CC18BF43750082B98D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D6FA49CA18BF43750082B98D /* InfoPlist.strings */; };
 		D6FA49D518BF46E50082B98D /* CocoaPodUI.m in Sources */ = {isa = PBXBuildFile; fileRef = D6FA49D418BF46E50082B98D /* CocoaPodUI.m */; };
+		D957B7BE1ABC2B9D005C4307 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = D957B7BD1ABC2B9D005C4307 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +129,7 @@
 		D6FA49CD18BF43750082B98D /* CocoaPodUI-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "CocoaPodUI-Prefix.pch"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D6FA49D318BF46E50082B98D /* CocoaPodUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaPodUI.h; sourceTree = "<group>"; };
 		D6FA49D418BF46E50082B98D /* CocoaPodUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CocoaPodUI.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D957B7BD1ABC2B9D005C4307 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,6 +300,7 @@
 			children = (
 				D6FA49C918BF43750082B98D /* CocoaPodUI-Info.plist */,
 				D6FA49CA18BF43750082B98D /* InfoPlist.strings */,
+				D957B7BD1ABC2B9D005C4307 /* README.md */,
 				D6FA49CD18BF43750082B98D /* CocoaPodUI-Prefix.pch */,
 				D6D1053818C0FC3600937033 /* Media.xcassets */,
 			);
@@ -428,6 +431,7 @@
 				6D1D23951945B11100E668B2 /* JMModalOverlay+Task.m in Sources */,
 				D6FA49D518BF46E50082B98D /* CocoaPodUI.m in Sources */,
 				6D280BB1190A8C0300220C9B /* AvailableTableDragDropSource.m in Sources */,
+				D957B7BE1ABC2B9D005C4307 /* README.md in Sources */,
 				6D8B7C9A18C22B0E0040A5C7 /* NSView+Frame.m in Sources */,
 				D67E063918C60DFC00200343 /* JMOverlayView.m in Sources */,
 				6DB207011906C7FB00098A49 /* RSVerticallyCenteredTextFieldCell.m in Sources */,
