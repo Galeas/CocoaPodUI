@@ -11,7 +11,7 @@
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>8A84C66625AB8C0A072E23C9ABF239141EC768B2</key>
-		<string>https://github.com/Galeas/CocoaPodUI.git</string>
+		<string>https://github.com/deksden/CocoaPodUI.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>CocoaPodUI.xcodeproj</string>
@@ -21,7 +21,7 @@
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/Galeas/CocoaPodUI.git</string>
+	<string>https://github.com/deksden/CocoaPodUI.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
