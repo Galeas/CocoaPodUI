@@ -14,8 +14,11 @@ Just remove CocoaPodUI.xcplugin from ~/Library/Application Support/Developer/Sha
 
 Version History
 ---------------
+
+- **v.1.2.3**
+    * (no new features, compatibility fixes) Xcode 6.3.1 and 6.4-beta-2 support.
 - **v.1.2.2**
-    * Add Xcode 6.2 and 6.3-beta-3 support.
+    * (no new features, compatibility fixes) Xcode 6.2 and 6.3-beta-3 support.
 - **v.1.2.1**
     * Add Xcode 6-beta support.
 - **v.1.2**
@@ -58,7 +61,7 @@ Special thanks to [kodlian (JMModalOverlay)](https://github.com/kodlian/JMModalO
 Adding support for new builds of XCode
 --------------------------------------
 
-Add the build UUIDs for the versions of Xcode you wish to support to DVTPlugInCompatibilityUUIDs in Info.plist. This can be found by running:
+Add the build UUIDs for the versions of Xcode you wish to support to DVTPlugInCompatibilityUUIDs in CocoaPodUI-Info.plist. This UUID can be found by running command in Terminal:
 
     defaults read /Applications/Xcode.app/Contents/Info DVTPlugInCompatibilityUUID
 
