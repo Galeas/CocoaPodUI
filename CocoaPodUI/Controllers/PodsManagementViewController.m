@@ -650,18 +650,12 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     
     __weak typeof(self) weakSelf = self;
     __block NSError *error = nil;
-    __block BOOL successFlag = YES;
+    
     id logView = self.enableConsoleOutput ? [self logView:nil] : nil;
     [output setReadabilityHandler:^(NSFileHandle *fileHandler) {
         NSData *data = [fileHandler availableData]; // this will read to EOF, so call only once
         NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-        if ([text rangeOfString:@"[!] From now on use"].location == NSNotFound || [text rangeOfString:@"Integrating client project"].location == NSNotFound) {
-            NSRange possibleErrorRange = [text rangeOfString:@"[!] "];
-            if (possibleErrorRange.location != NSNotFound) {
-                error = [NSError errorWithDomain:@"error::CocoaPodUI" code:666 userInfo:@{@"reason":[text substringFromIndex:NSMaxRange(possibleErrorRange)]}];
-                successFlag = NO;
-            }
-        }
+
         NSString *logString = [NSString stringWithFormat:@"\n%@", text];
         [weakSelf.overlayController performSelectorOnMainThread:@selector(appendText:) withObject:logString waitUntilDone:YES];
         if (logView) {
@@ -681,13 +675,13 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
         }
     }];
     
-    [installTask setTerminationHandler:^(NSTask *task) {
-        DLog(@"COCOAPODUI::INSTALLATION TERMINATION HANDLER");
-        if (success != nil) {
-            DLog(@"COCOAPODUI::WILL_PERFORM_INSTALSUCCESS_BLOCK");
-            success(successFlag, error);
-        }
-    }];
+//    [installTask setTerminationHandler:^(NSTask *task) {
+//        DLog(@"COCOAPODUI::INSTALLATION TERMINATION HANDLER");
+//        if (success != nil) {
+//            DLog(@"COCOAPODUI::WILL_PERFORM_INSTALSUCCESS_BLOCK");
+//            success(successFlag, error);
+//        }
+//    }];
     
     NSMutableDictionary * environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
     environment[@"LC_ALL"]=@"en_US.UTF-8";
@@ -701,6 +695,29 @@ typedef NS_ENUM(NSUInteger, ProjectFileType) {
     }
     
     [installTask waitUntilExit];
+    
+    int status = [installTask terminationStatus];
+    
+    if (status == 0) {
+        if (success != nil) {
+            DLog(@"COCOAPODUI::WILL_PERFORM_INSTALSUCCESS_BLOCK");
+            success(YES, error);
+        }
+    }
+    else {
+        NSData *data = [output availableData]; // this will read to EOF, so call only once
+        NSString *text = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+            NSRange possibleErrorRange = [text rangeOfString:@"[!] "];
+            if (possibleErrorRange.location != NSNotFound) {
+                error = [NSError errorWithDomain:@"error::CocoaPodUI" code:666 userInfo:@{@"reason":[text substringFromIndex:NSMaxRange(possibleErrorRange)]}];
+                success(NO, error);
+            }
+            else {
+                error = [NSError errorWithDomain:@"error::CocoaPodUI" code:666 userInfo:@{@"reason":text}];
+                success(NO, error);
+            }
+        
+    }
 }
 
 - (NSString*)podfileString
