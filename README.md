@@ -15,6 +15,9 @@ Just remove CocoaPodUI.xcplugin from ~/Library/Application Support/Developer/Sha
 Version History
 ---------------
 
+
+- **v.1.2.4**
+    * (no new features, compatibility fixes) Xcode 6.3.2 and 6.4-beta-3 (6E23).
 - **v.1.2.3**
     * (no new features, compatibility fixes) Xcode 6.3.1 and 6.4-beta-2 support.
 - **v.1.2.2**
