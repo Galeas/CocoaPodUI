@@ -72,7 +72,7 @@
 - (NSArray *)versions
 {
     if ([self.platformName isEqualToString:@"iOS"]) {
-        return @[@"4.3", @"5.0", @"6.0", @"7.0"];
+        return @[@"4.3", @"5.0", @"6.0", @"7.0", @"8.0", @"9.0"];
     }
     else {
         return @[@"10.5", @"10.6", @"10.7", @"10.8", @"10.9"];
