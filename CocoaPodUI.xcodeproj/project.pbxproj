@@ -73,6 +73,13 @@
 			remoteGlobalIDString = EB2B5928124E2100001FFEEB;
 			remoteInfo = events;
 		};
+		F056BBF31D0D942200B484E3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DE28F2718EAD8B70025F471 /* YAML.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = YAML;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -321,6 +328,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F056BBF41D0D942200B484E3 /* PBXTargetDependency */,
 			);
 			name = CocoaPodUI;
 			productName = CocoaPodUI;
@@ -441,6 +449,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F056BBF41D0D942200B484E3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YAML;
+			targetProxy = F056BBF31D0D942200B484E3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		D6FA49CA18BF43750082B98D /* InfoPlist.strings */ = {
