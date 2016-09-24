@@ -1,3 +1,5 @@
+***The project support is stopped due to incompatibility of Xcode 8+ with "classic" plugins.***
+
 CocoaPodUI
 ----------
 
